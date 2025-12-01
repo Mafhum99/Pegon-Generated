@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penerjemah Latin ↔ Pegon</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="glass-header">
+            <h1>Penerjemah Latin ↔ Pegon</h1>
+        </header>
+
+        <main class="main-content">
+            <div class="translator-container glass-card">
+                <div class="input-section">
+                    <div class="section-header">
+                        <h2>Teks Latin</h2>
+                        <button id="swap-btn" class="btn secondary-btn swap-btn">⇄</button>
+                    </div>
+                    <textarea id="latin-input" placeholder="Masukkan teks dalam bahasa Latin di sini..."></textarea>
+                    <!-- Character counter will be added here by JavaScript -->
+                    <div class="input-controls">
+                        <button id="translate-btn" class="btn primary-btn">Terjemahkan →</button>
+                        <button id="clear-input" class="btn secondary-btn">Bersihkan</button>
+                    </div>
+                    <div class="auto-translate-container">
+                        <label>
+                            <input type="checkbox" id="auto-translate" > Terjemahan Otomatis
+                        </label>
+                    </div>
+                </div>
+
+                <div class="output-section">
+                    <h2>Teks Pegon</h2>
+                    <div id="pegon-output" class="output-display" placeholder="Hasil terjemahan Pegon akan muncul di sini..."></div>
+                    <div class="output-controls">
+                        <button id="copy-output" class="btn secondary-btn">Salin Teks</button>
+                        <button id="clear-output" class="btn secondary-btn">Bersihkan</button>
+                    </div>
+                    <div class="harakah-container">
+                        <label>
+                            <input type="checkbox" id="harakah-toggle" > Tampilkan Harakah
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section glass-card">
+                <h2>Tentang Pegon</h2>
+                <p>Pegon adalah sistem penulisan berbasis Arab yang digunakan untuk menulis bahasa Jawa, Sunda, Madura, dan bahasa Indonesia lainnya. Script ini merupakan adaptasi dari abjad Arab untuk mengakomodasi bunyi-bunyi dalam bahasa lokal.</p>
+                <div class="examples">
+                    <h3>Contoh:</h3>
+                    <p><strong>Latin:</strong> Saya sedang belajar bahasa Pegon</p>
+                    <p><strong>Pegon:</strong> ساي سدڠ بلجر بهسا ڤيڬون</p>
+                </div>
+                <div class="quick-phrases">
+                    <h3>Frasa Umum:</h3>
+                    <button class="btn secondary-btn" onclick="fillExample('Saya sedang belajar', 'ساي سدڠ بلجر')">Saya sedang belajar</button>
+                    <button class="btn secondary-btn" onclick="fillExample('Apa kabar?', 'اڤ kabر؟')">Apa kabar?</button>
+                    <button class="btn secondary-btn" onclick="fillExample('Terima kasih', 'تريما كاسيه')">Terima kasih</button>
+                    <button class="btn secondary-btn" onclick="fillExample('Bagaimana kabarmu?', 'بڬيمان كابرمو؟')">Bagaimana kabarmu?</button>
+                </div>
+            </div>
+        </main>
+
+        <footer class="glass-footer">
+            <p>Dibuat dengan ❤️ untuk pelestarian budaya dan bahasa lokal | © 2025 Penerjemah Latin↔Pegon</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Global function to fill example text
+        function fillExample(latin, pegon) {
+            document.getElementById('latin-input').value = latin;
+            document.getElementById('pegon-output').textContent = pegon;
+            document.getElementById('pegon-output').style.direction = 'rtl';
+            document.getElementById('pegon-output').style.textAlign = 'right';
+        }
+    </script>
+</body>
+</html>
