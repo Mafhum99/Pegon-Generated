@@ -1,5 +1,8 @@
 # 🌟 Penerjemah Latin ke Pegon 📚
 
+<img width="1360" height="652" alt="Screenshot from 2025-12-04 15-50-49" src="https://github.com/user-attachments/assets/26813304-cf1c-4382-b565-e63917a60237" />
+
+
 > 🚀 Aplikasi penerjemah untuk mengonversi teks dari huruf Latin ke Pegon 🔄
 
 <div align="center">
