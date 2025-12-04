@@ -2,58 +2,6 @@
 
 class PegonTranslator {
   constructor() {
-    // Pegon to Latin conversion mapping (reverse mapping)
-    this.pegonToLatinMap = {
-      'ا': 'a',
-      'ي': 'i',
-      'و': 'u',
-      'ب': 'b',
-      'ت': 't',
-      'س': 's',
-      'ج': 'j',
-      'ه': 'h',
-      'ك': 'k',
-      'ل': 'l',
-      'م': 'm',
-      'ن': 'n',
-      'ڤ': 'p',
-      'ر': 'r',
-      'ف': 'f',
-      'ق': 'q',
-      'ݢ': 'g',
-      'ڠ': 'ng',
-      'ڽ': 'ny',
-      'چ': 'ch',
-      'خ': 'kh',
-      'ش': 'sy',
-      'ث': 'th',
-      'ذ': 'dh',
-      'ز': 'z',
-      'ض': 'dh',
-      'ظ': 'zh',
-      'غ': 'gh',
-      'ف': 'f',
-      'ظ': 'z',
-      'ط': 'th',
-      'ع': 'a',
-      'ح': 'h',
-      'ص': 's',
-      // Diacritics and punctuation
-      'َ': 'a',
-      'ِ': 'i',
-      'ُ': 'u',
-      'ّ': '', // Shadda (gemination) - remove or duplicate previous consonant
-      'ْ': '',
-      'ً': 'an',
-      'ٍ': 'in',
-      'ٌ': 'un',
-      // Punctuation
-      '،': ',',
-      '؟': '?',
-      '۔': '.',
-      '؛': ';'
-    };
-
     // Latin to Pegon conversion mapping
     this.latinToPegonMap = {
       // Basic consonants (vowels will be handled with diacritics when needed)
@@ -113,6 +61,18 @@ class PegonTranslator {
       'e': 'ا',
       'o': 'و',
 
+      // Numbers (Eastern Arabic/Pegon numerals)
+      '0': '٠',
+      '1': '١',
+      '2': '٢',
+      '3': '٣',
+      '4': '٤',
+      '5': '٥',
+      '6': '٦',
+      '7': '٧',
+      '8': '٨',
+      '9': '٩',
+
       // Additional combinations that might appear in Indonesian
       'ai': 'اي',
       'au': 'اُو', // or 'اُو' - depends on context
@@ -170,11 +130,10 @@ class PegonTranslator {
       { latin: 'Saya sedang belajar', pegon: 'ساي سدڠ بلجر' },
       { latin: 'Apa kabar?', pegon: 'اڤا كابار؟' },
       { latin: 'Terima kasih', pegon: 'تريما كاسيه' },
-      // { latin: 'Selamat pagi', pegon: 'سلاamt ڤڬي' },
+      { latin: 'Selamat pagi', pegon: 'سلاamt ڤڬي' },
       { latin: 'Bagaimana kabarmu?', pegon: 'بڬيمان كابرمو؟' }
     ];
 
-    this.isLatinToPegon = true; // Current translation direction
     this.showHarakah = false; // Whether to show harakah/diacritics
     this.init();
   }
@@ -187,15 +146,14 @@ class PegonTranslator {
     this.clearInputBtn = document.getElementById('clear-input');
     this.clearOutputBtn = document.getElementById('clear-output');
     this.copyOutputBtn = document.getElementById('copy-output');
-    this.swapBtn = document.getElementById('swap-btn');
     this.harakahToggle = document.getElementById('harakah-toggle');
+    this.autoTranslateCheckbox = document.getElementById('auto-translate');
 
     // Set up event listeners
     this.translateBtn.addEventListener('click', () => this.translate());
     this.clearInputBtn.addEventListener('click', () => this.clearInput());
     this.clearOutputBtn.addEventListener('click', () => this.clearOutput());
     this.copyOutputBtn.addEventListener('click', () => this.copyToClipboard());
-    this.swapBtn.addEventListener('click', () => this.swapDirection());
     this.harakahToggle.addEventListener('change', (e) => {
       this.showHarakah = e.target.checked;
       // Re-translate to apply harakah changes if there's content
@@ -215,30 +173,8 @@ class PegonTranslator {
     // Update character count as user types
     this.latinInput.addEventListener('input', () => this.updateCharacterCount());
 
-    // Auto-translate option (optional)
+    // Auto-translate option (default to checked)
     this.setupAutoTranslate();
-  }
-
-  // Swap translation direction (Latin ↔ Pegon)
-  swapDirection() {
-    // Swap the content between input and output
-    const tempText = this.latinInput.value;
-    const tempOutput = this.pegonOutput.textContent;
-
-    this.latinInput.value = tempOutput;
-    this.pegonOutput.textContent = tempText;
-
-    // Update the character counter
-    this.updateCharacterCount();
-
-    // Make sure the output still has RTL direction if it contains Pegon text
-    if (this.containsArabicScript(this.pegonOutput.textContent)) {
-      this.pegonOutput.style.direction = 'rtl';
-      this.pegonOutput.style.textAlign = 'right';
-    } else {
-      this.pegonOutput.style.direction = '';
-      this.pegonOutput.style.textAlign = '';
-    }
   }
 
   // Check if text contains Arabic/Pegon script
@@ -293,7 +229,7 @@ class PegonTranslator {
     counterElement.textContent = `${count} karakter`;
   }
 
-  // Main translation method - handles both directions
+  // Main translation method - Latin to Pegon only
   translate() {
     const inputText = this.latinInput.value.trim();
     if (!inputText) {
@@ -307,27 +243,16 @@ class PegonTranslator {
 
       // Convert to lowercase to ensure consistent translations regardless of case
       const normalizedText = inputText.toLowerCase();
-      
+
       // Perform translation after a short delay to show loading
       setTimeout(() => {
-        let convertedText;
-        if (this.isLatinToPegon) {
-          convertedText = this.convertToPegon(normalizedText);
-        } else {
-          // For Pegon to Latin, we'd implement that functionality
-          convertedText = this.convertToLatin(normalizedText);
-        }
+        const convertedText = this.convertToPegon(normalizedText);
 
         this.pegonOutput.textContent = convertedText;
 
         // Set RTL direction for Pegon output
-        if (this.isLatinToPegon) {
-          this.pegonOutput.style.direction = 'rtl';
-          this.pegonOutput.style.textAlign = 'right';
-        } else {
-          this.pegonOutput.style.direction = 'ltr';
-          this.pegonOutput.style.textAlign = 'left';
-        }
+        this.pegonOutput.style.direction = 'rtl';
+        this.pegonOutput.style.textAlign = 'right';
       }, 300);
     } catch (error) {
       console.error('Translation error:', error);
@@ -349,13 +274,13 @@ class PegonTranslator {
     // We'll process the text in a way that handles both single and multi-character patterns
     let output = '';
     let i = 0;
-    
+
     // Keep track of consonant/vowel patterns to avoid issues like "dan" -> "دان"
     let consonantPattern = '';
-    
+
     while (i < result.length) {
       let found = false;
-      
+
       // Check for 3-character patterns first (longest first to avoid partial matches)
       if (i < result.length - 2) {
         const threeChar = result.substring(i, i + 3);
@@ -365,7 +290,7 @@ class PegonTranslator {
           found = true;
         }
       }
-      
+
       // Check for 2-character patterns (like 'ng', 'ny', etc.)
       if (!found && i < result.length - 1) {
         const twoChar = result.substring(i, i + 2);
@@ -375,35 +300,60 @@ class PegonTranslator {
           found = true;
         }
       }
-      
+
       // If no multi-char match, check single character
       if (!found) {
         const singleChar = result[i];
         if (this.latinToPegonMap[singleChar]) {
           output += this.latinToPegonMap[singleChar];
-          
+
           // Track consonant/vowel for context
           if (/[aeiou]/.test(singleChar)) {
             consonantPattern += 'V'; // vowel
           } else if (/[bcdfghjklmnpqrstvwxyz]/.test(singleChar)) {
             consonantPattern += 'C'; // consonant
           } else {
-            consonantPattern += singleChar; // space, punctuation
+            consonantPattern += singleChar; // space, punctuation, numbers
           }
         } else {
           // Keep the original character if no mapping exists
-          // But handle spaces, punctuation properly
+          // But handle spaces, punctuation, and numbers properly
           if (singleChar === ' ') {
             output += ' '; // Space remains space
             consonantPattern += ' '; // Add space to pattern too
-          } else if (/[.,!?;:()]/.test(singleChar)) {
+          } else if (/[0-9]/.test(singleChar)) {
+            // Numbers remain as Latin digits
+            output += singleChar;
+            consonantPattern += singleChar; // Keep numbers in pattern
+          } else if (/[.,!?;:()\-'"[\]/\\]/.test(singleChar)) {
             // Punctuation marks - use corresponding Arabic punctuation if needed
             const punctMap = {
               '.': '۔',
               ',': '،',
               '?': '؟',
               '!': '!',
-              ';': '؛'
+              ';': '؛',
+              '(': '(',
+              ')': ')',
+              '[': '[',
+              ']': ']',
+              '-': '-',
+              '"': '"',
+              "'": "'",
+              ':': ':',
+              '/': '/',
+              '\\': '\\',
+              '_': '_',
+              '@': '@',
+              '#': '#',
+              '$': '$',
+              '%': '%',
+              '&': '&',
+              '*': '*',
+              '+': '+',
+              '=': '=',
+              '<': '<',
+              '>': '>'
             };
             output += punctMap[singleChar] || singleChar;
             consonantPattern += singleChar; // Keep punctuation in pattern
@@ -415,37 +365,19 @@ class PegonTranslator {
         i++;
       }
     }
-    
+
     // Handle vowel patterns after consonant conversion - but carefully
     output = this.handleVowelPatterns(output);
-    
+
     // Apply word-level formatting
     output = this.formatWords(output);
-    
+
     // Add harakah (diacritics) if enabled
     if (this.showHarakah) {
       output = this.addHarakah(output);
     }
-    
+
     return output;
-  }
-
-  // Convert Pegon to Latin (placeholder implementation)
-  convertToLatin(text) {
-    let result = text;
-
-    // Remove harakah (diacritics) before conversion
-    result = result.replace(/[\u064B-\u065F]/g, ''); // Remove all Arabic diacritics
-
-    // Replace each Pegon character with its Latin equivalent
-    for (const [pegonChar, latinChar] of Object.entries(this.pegonToLatinMap)) {
-      result = result.split(pegonChar).join(latinChar);
-    }
-
-    // Handle special cases like shadda (gemination)
-    result = result.replace(/(.)ّ/g, '$1$1'); // Double the preceding character
-
-    return result;
   }
 
   // Format words to follow Pegon conventions
@@ -460,37 +392,51 @@ class PegonTranslator {
 
   // Add harakah (diacritics) to Pegon text
   addHarakah(text) {
-    // This function adds harakah (diacritics) based on standard Arabic/Pegon rules
-    // For Indonesian context, we'll be more careful to not over-apply diacritics
-    
-    // Add fatha (َ) for 'a' sounds after consonants - being more specific to avoid issues
-    // This replaces standalone 'ا' that follows consonants with the consonant + fatha + alif
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ا)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$)/g, '$1َا');
-    
-    // Handle 'ا' that appears in the middle of words or between consonants
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ا)([ب-ي])/g, '$1َا$2');
-    
-    // Add kasra (ِ) for 'i' sounds after consonants
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ي)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$)/g, '$1ِي');
-    
-    // Add damma (ُ) for 'u' sounds after consonants  
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(و)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$)/g, '$1ُو');
-    
-    return text;
+    // For proper harakah implementation, we need to go back to the original context
+    // and apply harakah based on the vowel sounds that were in the original Latin text
+    // Also add sukun ( ْ ) for consonants not followed by vowels in proper contexts
+
+    // Create a copy of the text to work with
+    let result = text;
+
+    // Replace patterns systematically:
+    // When we have a consonant followed by what was originally a vowel letter,
+    // we add the appropriate harakah to the consonant and adjust the vowel letter
+
+    // Pattern 1: Consonant followed by 'ا' (alif) representing an 'a' sound
+    // This should become consonant + fatha + alif
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ا)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1َا');
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ا)(?=[ب-ي])/g, '$1َا');
+
+    // Pattern 2: Consonant followed by 'ي' (ya) representing an 'i' sound
+    // This should become consonant + kasra + ya
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ي)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1ِي');
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ي)(?=[ب-ي])/g, '$1ِي');
+
+    // Pattern 3: Consonant followed by 'و' (wawu) representing a 'u' sound
+    // This should become consonant + damma + wawu
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(و)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1ُو');
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(و)(?=[ب-ي])/g, '$1ُو');
+
+    // Add sukun ( ْ ) to consonants that are not followed by vowels and not at word end
+    // Only when followed by another consonant and not already marked with other harakah
+    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(?=[ب-ي])(?![َُِّايو])(?!\s|\.|,|;|:|!|\?|،|؟|۔|$)/g, '$1ْ');
+
+    return result;
   }
 
   // Handle proper vowel patterns in Pegon
   handleVowelPatterns(text) {
     // In Pegon, vowels are often marked with diacritics or use specific letters
     // We'll apply rules to make the output more accurate
-    
+
     // The issue was that standalone 'a', 'i', 'u' were being converted to alif, ya, wawu
-    // which caused problems like "dan" becoming "دaن" and then "دان"
+    // which caused problems like "dan" becoming "دaن" and then "dan"
     // We should preserve vowels that are between consonants
-    
+
     // For now, we'll keep this function minimal to prevent over-conversion
     // The main conversion should happen during the character mapping
-    
+
     return text;
   }
 
@@ -542,6 +488,39 @@ class PegonTranslator {
     document.body.removeChild(element);
   }
 
+  // Update auto-translate to use the checkbox element and ensure it works by default
+  setupAutoTranslate() {
+    // Check the auto-translate checkbox by default
+    if (this.autoTranslateCheckbox) {
+      this.autoTranslateCheckbox.checked = true;
+      
+      // Add event listener for auto-translate
+      let autoTranslateTimeout;
+      this.autoTranslateCheckbox.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          this.latinInput.addEventListener('input', () => {
+            clearTimeout(autoTranslateTimeout);
+            autoTranslateTimeout = setTimeout(() => {
+              this.translate();
+            }, 1000);
+          });
+        } else {
+          // Clear any pending timeout when auto-translate is disabled
+          clearTimeout(autoTranslateTimeout);
+        }
+      });
+      
+      // Also trigger auto-translate by default since checkbox is checked
+      if (this.autoTranslateCheckbox.checked) {
+        this.latinInput.addEventListener('input', () => {
+          clearTimeout(autoTranslateTimeout);
+          autoTranslateTimeout = setTimeout(() => {
+            this.translate();
+          }, 1000);
+        });
+      }
+    }
+  }
 }
 
 // Initialize the translator when the DOM is loaded
