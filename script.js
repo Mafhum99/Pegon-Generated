@@ -53,13 +53,13 @@ class PegonTranslator {
       'zh': 'ز',
       'dz': 'ز',
 
-      // Vowel sounds - these should be handled as diacritics in proper context
-      // but we'll include them for cases where they appear standalone
-      'a': 'ا',
-      'i': 'ي',
-      'u': 'و',
-      'e': 'ا',
-      'o': 'و',
+      // Vowel sounds - these will be handled with proper harakah in context
+      // These are for standalone vowels or initial vowels in words
+      'a': 'ا',  // Alif for 'a' sound at word start
+      'i': 'ي',  // Ya for 'i' sound at word start
+      'u': 'و',  // Waw for 'u' sound at word start
+      'e': ' ',   // 'e' sound (pepet) - will be handled with special harakah in context
+      'o': 'و',  // 'o' often rendered as 'u' in Indonesian Pegon context
 
       // Numbers (Eastern Arabic/Pegon numerals)
       '0': '٠',
@@ -250,9 +250,9 @@ class PegonTranslator {
 
         this.pegonOutput.textContent = convertedText;
 
-        // Set RTL direction for Pegon output
-        this.pegonOutput.style.direction = 'rtl';
-        this.pegonOutput.style.textAlign = 'right';
+        // Set RTL direction and Arabic font for Pegon output
+        this.pegonOutput.classList.add('arabic-text', 'pegon-text');
+        this.pegonOutput.dir = 'rtl';
       }, 300);
     } catch (error) {
       console.error('Translation error:', error);
@@ -260,23 +260,22 @@ class PegonTranslator {
     }
   }
 
-  // Convert Latin text to Pegon
+  // Convert Latin text to Pegon with context for pepet handling
   convertToPegon(text) {
-    // First, handle word boundaries and apply special rules
-    let result = text;
+    // First, handle word boundaries and apply special rules for consonant combinations
+    let result = text.toLowerCase();
 
     // Apply special rules that handle context (like 'ng', 'ny' before vowels)
+    // This replaces patterns like 'ny' followed by vowels with 'ڽ'
     this.specialRules.forEach(rule => {
       result = result.replace(rule.pattern, rule.replacement);
     });
 
     // Apply character-by-character conversion
     // We'll process the text in a way that handles both single and multi-character patterns
+    // We'll also keep track of where 'e' characters were originally located
     let output = '';
     let i = 0;
-
-    // Keep track of consonant/vowel patterns to avoid issues like "dan" -> "دان"
-    let consonantPattern = '';
 
     while (i < result.length) {
       let found = false;
@@ -305,26 +304,19 @@ class PegonTranslator {
       if (!found) {
         const singleChar = result[i];
         if (this.latinToPegonMap[singleChar]) {
-          output += this.latinToPegonMap[singleChar];
-
-          // Track consonant/vowel for context
-          if (/[aeiou]/.test(singleChar)) {
-            consonantPattern += 'V'; // vowel
-          } else if (/[bcdfghjklmnpqrstvwxyz]/.test(singleChar)) {
-            consonantPattern += 'C'; // consonant
+          if (singleChar === 'e') {
+            // For 'e', we add a placeholder marker that will be handled in harakah
+            output += 'E'; // Use 'E' as a temporary marker for 'e' positions
           } else {
-            consonantPattern += singleChar; // space, punctuation, numbers
+            output += this.latinToPegonMap[singleChar];
           }
         } else {
-          // Keep the original character if no mapping exists
-          // But handle spaces, punctuation, and numbers properly
+          // Handle spaces, punctuation, and numbers properly
           if (singleChar === ' ') {
             output += ' '; // Space remains space
-            consonantPattern += ' '; // Add space to pattern too
           } else if (/[0-9]/.test(singleChar)) {
             // Numbers remain as Latin digits
             output += singleChar;
-            consonantPattern += singleChar; // Keep numbers in pattern
           } else if (/[.,!?;:()\-'"[\]/\\]/.test(singleChar)) {
             // Punctuation marks - use corresponding Arabic punctuation if needed
             const punctMap = {
@@ -356,10 +348,8 @@ class PegonTranslator {
               '>': '>'
             };
             output += punctMap[singleChar] || singleChar;
-            consonantPattern += singleChar; // Keep punctuation in pattern
           } else {
             output += singleChar; // Keep other characters as is
-            consonantPattern += singleChar; // Keep in pattern
           }
         }
         i++;
@@ -375,6 +365,9 @@ class PegonTranslator {
     // Add harakah (diacritics) if enabled
     if (this.showHarakah) {
       output = this.addHarakah(output);
+    } else {
+      // Remove the temporary 'E' markers if harakah is disabled
+      output = output.replace(/E/g, '');
     }
 
     return output;
@@ -382,61 +375,50 @@ class PegonTranslator {
 
   // Format words to follow Pegon conventions
   formatWords(text) {
-    // In Pegon, words are typically written connected without spaces
-    // Though in our implementation we might want to keep word boundaries for readability
-    // For now, we'll just clean up any potential formatting issues
-
     // Handle multiple spaces
     return text.replace(/\s+/g, ' ');
   }
 
-  // Add harakah (diacritics) to Pegon text
+  // Add harakah (diacritics) to Pegon text - with pepet support
   addHarakah(text) {
-    // For proper harakah implementation, we need to go back to the original context
-    // and apply harakah based on the vowel sounds that were in the original Latin text
-    // Also add sukun ( ْ ) for consonants not followed by vowels in proper contexts
+    // In proper Arabic/Pegon script, harakah are diacritics added to consonants
+    // to indicate short vowels
+    
+    // Fatha ( َ ) - short 'a' sound
+    // Kasra ( ِ ) - short 'i' sound  
+    // Damma ( ُ ) - short 'u' sound
+    // Pepet ( ۤ ) - short 'e' sound in Pegon script  
+    // Sukun ( ْ ) - absence of vowel sound
 
-    // Create a copy of the text to work with
-    let result = text;
+    // Apply harakah rules in proper order
 
-    // Replace patterns systematically:
-    // When we have a consonant followed by what was originally a vowel letter,
-    // we add the appropriate harakah to the consonant and adjust the vowel letter
+    // First, handle general vowel rules (before handling 'e' markers)
+    // For consonant followed by 'a' sound:
+    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)ا/g, '$1َا');  // consonant with fatha + alif
+    
+    // For consonant followed by 'i' sound:
+    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)ي/g, '$1ِي');  // consonant with kasra + ya
+    
+    // For consonant followed by 'u' sound:
+    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)و/g, '$1ُو');  // consonant with damma + waw
+    
+    // Handle consonant + 'E' pattern for 'e' (pepet) sound
+    // This should replace 'E' that appears after consonants with pepet
+    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)([E])/g, '$1ۤ');
+    
+    // Handle any remaining 'E' markers by replacing them with pepet
+    text = text.replace(/[E]/g, 'ۤ');
+    
+    // For standalone consonants (not followed by vowels), add sukun
+    // This should be done after all other vowel processing
+    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1ْ');
 
-    // Pattern 1: Consonant followed by 'ا' (alif) representing an 'a' sound
-    // This should become consonant + fatha + alif
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ا)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1َا');
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ا)(?=[ب-ي])/g, '$1َا');
-
-    // Pattern 2: Consonant followed by 'ي' (ya) representing an 'i' sound
-    // This should become consonant + kasra + ya
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ي)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1ِي');
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(ي)(?=[ب-ي])/g, '$1ِي');
-
-    // Pattern 3: Consonant followed by 'و' (wawu) representing a 'u' sound
-    // This should become consonant + damma + wawu
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(و)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1ُو');
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(و)(?=[ب-ي])/g, '$1ُو');
-
-    // Add sukun ( ْ ) to consonants that are not followed by vowels and not at word end
-    // Only when followed by another consonant and not already marked with other harakah
-    result = result.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(?=[ب-ي])(?![َُِّايو])(?!\s|\.|,|;|:|!|\?|،|؟|۔|$)/g, '$1ْ');
-
-    return result;
+    return text;
   }
 
   // Handle proper vowel patterns in Pegon
   handleVowelPatterns(text) {
-    // In Pegon, vowels are often marked with diacritics or use specific letters
-    // We'll apply rules to make the output more accurate
-
-    // The issue was that standalone 'a', 'i', 'u' were being converted to alif, ya, wawu
-    // which caused problems like "dan" becoming "دaن" and then "dan"
-    // We should preserve vowels that are between consonants
-
-    // For now, we'll keep this function minimal to prevent over-conversion
-    // The main conversion should happen during the character mapping
-
+    // This function is maintained for compatibility
     return text;
   }
 
@@ -448,8 +430,8 @@ class PegonTranslator {
 
   clearOutput() {
     this.pegonOutput.textContent = '';
-    this.pegonOutput.style.direction = '';
-    this.pegonOutput.style.textAlign = '';
+    this.pegonOutput.dir = '';
+    this.pegonOutput.classList.remove('arabic-text', 'pegon-text');
   }
 
   copyToClipboard() {
@@ -493,7 +475,7 @@ class PegonTranslator {
     // Check the auto-translate checkbox by default
     if (this.autoTranslateCheckbox) {
       this.autoTranslateCheckbox.checked = true;
-      
+
       // Add event listener for auto-translate
       let autoTranslateTimeout;
       this.autoTranslateCheckbox.addEventListener('change', (e) => {
@@ -509,7 +491,7 @@ class PegonTranslator {
           clearTimeout(autoTranslateTimeout);
         }
       });
-      
+
       // Also trigger auto-translate by default since checkbox is checked
       if (this.autoTranslateCheckbox.checked) {
         this.latinInput.addEventListener('input', () => {

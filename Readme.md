@@ -18,6 +18,7 @@
 - 📝 **Input Teks Panjang**: Dukungan untuk teks panjang dengan karakter counter
 - 📄 **Salin & Unduh**: Fasilitas untuk menyalin dan mengunduh teks terjemahan
 - 🎨 **Desain Modern**: Tampilan glassmorphism yang cantik dan responsif
+- 💾 **Akses Offline**: Dapat digunakan tanpa koneksi internet berkat font lokal
 
 ## 📖 Apa Itu Pegon?
 
@@ -33,6 +34,11 @@
 - 🌐 **HTML5** - Struktur halaman web
 - 🎨 **CSS3** - Desain antarmuka dengan efek glassmorphism
 - ⚙️ **JavaScript (ES6)** - Logika penerjemahan dan interaksi pengguna
+- 📦 **Offline Support** - Aplikasi dapat diakses tanpa koneksi internet
+
+## 🔌 Mode Offline
+
+Aplikasi ini mendukung mode offline sepenuhnya! Semua font dan aset diperlukan disimpan secara lokal sehingga aplikasi dapat berjalan tanpa koneksi internet.
 
 ## 🎨 Tampilan Aplikasi
 

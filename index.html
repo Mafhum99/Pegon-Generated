@@ -74,9 +74,10 @@
         // Global function to fill example text
         function fillExample(latin, pegon) {
             document.getElementById('latin-input').value = latin;
-            document.getElementById('pegon-output').textContent = pegon;
-            document.getElementById('pegon-output').style.direction = 'rtl';
-            document.getElementById('pegon-output').style.textAlign = 'right';
+            const outputElement = document.getElementById('pegon-output');
+            outputElement.textContent = pegon;
+            outputElement.classList.add('arabic-text', 'pegon-text');
+            outputElement.dir = 'rtl';
         }
     </script>
 </body>

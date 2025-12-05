@@ -53,6 +53,38 @@
   --dark-btn-secondary-hover: #5a5d75;
   --dark-btn-text: #ffffff;
   --dark-btn-secondary-text: var(--dracula-foreground);
+  
+  /* Define Amiri font for Arabic/Pegon text */
+  --arabic-font: 'Amiri', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Amiri Quran', 'Scheherazade New', 'Traditional Arabic', 'Arabic Typesetting', 'Arial Unicode MS', 'Tahoma', 'Harmattan', 'Changa', serif;
+}
+
+/* Define Amiri font for Arabic/Pegon text */
+@font-face {
+  font-family: 'Amiri';
+  src: url('./Assets/font/AmiriQuran-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Ensures text remains visible during font loading */
+}
+
+/* Define Noto Sans Arabic font for better character support */
+@font-face {
+  font-family: 'Noto Sans Arabic';
+  src: url('./Assets/font/NotoSansArabic-Regular.ttf') format('truetype'),
+       url('./Assets/font/NotoSansArabic-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Define Noto Naskh Arabic font for better character support */
+@font-face {
+  font-family: 'Noto Naskh Arabic';
+  src: url('./Assets/font/NotoNaskhArabic-Regular.ttf') format('truetype'),
+       url('./Assets/font/NotoNaskhArabic-Regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -170,7 +202,7 @@ textarea {
   background: rgba(255, 255, 255, 0.2);
   color: var(--text-primary);
   font-size: 1rem;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--arabic-font), 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   resize: vertical;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
@@ -193,7 +225,7 @@ textarea:focus {
   color: var(--text-primary);
   font-size: 1.1rem;
   line-height: 1.6;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--arabic-font), 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   overflow-y: auto;
   word-wrap: break-word;
   backdrop-filter: blur(4px);
@@ -560,4 +592,66 @@ textarea:focus,
 .loading {
   border: 3px solid rgba(255, 255, 255, 0.1);
   border-top-color: var(--dracula-purple);
+}
+
+/* Arabic/Pegon text styling */
+.arabic-text,
+.pegon-text {
+  font-family: var(--arabic-font);
+  direction: rtl;
+  text-align: right;
+  font-size: 1.3rem;
+  line-height: 1.8;
+  letter-spacing: 0.5px;
+}
+
+/* Specific styling for Arabic script characters */
+:lang(ar) {
+  font-family: var(--arabic-font);
+}
+
+/* Support for Arabic text within other elements */
+.output-display[dir="rtl"],
+#pegon-output {
+  font-family: var(--arabic-font);
+  font-size: 1.3rem;
+  line-height: 1.8;
+}
+
+/* Font fallback for specific Pegon characters */
+#pegon-output {
+  font-feature-settings: 'liga' on;
+  -webkit-font-feature-settings: 'liga' on;
+  font-variant: normal;
+}
+
+/* Enhance rendering for browsers that support it */
+@media screen and (-webkit-min-device-pixel-ratio: 1.25), screen and (-o-min-device-pixel-ratio: 5/4), screen and (min-resolution: 120dpi) {
+  .output-display,
+  #pegon-output,
+  .arabic-text,
+  .pegon-text {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+}
+
+/* Specific handling for Pegon characters that might not be in all fonts */
+#pegon-output {
+  /* Ensure proper rendering of special Pegon characters */
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
+  -webkit-font-variant-ligatures: common-ligatures;
+  font-variant-east-asian: normal;
+  /* Force text rendering for Arabic script */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* More specific character fallbacks for common Pegon characters */
+#pegon-output {
+  /* Explicitly target the special characters used in Pegon that may not be in all fonts */
+  font-family: var(--arabic-font) !important; 
 }
