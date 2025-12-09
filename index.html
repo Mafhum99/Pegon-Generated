@@ -17,9 +17,8 @@
                 <div class="input-section">
                     <div class="section-header">
                         <h2>Teks Latin</h2>
-                        <button id="swap-btn" class="btn secondary-btn swap-btn">⇄</button>
                     </div>
-                    <textarea id="latin-input" placeholder="Masukkan teks dalam bahasa Latin di sini..."></textarea>
+                    <textarea id="latin-input" style="font-size: 24px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;" placeholder="Masukkan teks dalam bahasa Latin di sini..."></textarea>
                     <!-- Character counter will be added here by JavaScript -->
                     <div class="input-controls">
                         <button id="translate-btn" class="btn primary-btn">Terjemahkan →</button>
@@ -36,15 +35,10 @@
                     <div class="section-header">
                         <h2>Teks Pegon</h2>
                     </div>
-                    <div id="pegon-output" class="output-display" placeholder="Hasil terjemahan Pegon akan muncul di sini..."></div>
+                    <div id="pegon-output" class="output-display" style="font-size: 24px;"  placeholder="Hasil terjemahan Pegon akan muncul di sini..."></div>
                     <div class="output-controls">
                         <button id="copy-output" class="btn secondary-btn">Salin Teks</button>
                         <button id="clear-output" class="btn secondary-btn">Bersihkan</button>
-                    </div>
-                    <div class="harakah-container">
-                        <label>
-                            <input type="checkbox" id="harakah-toggle"> Tampilkan Harakah
-                        </label>
                     </div>
                 </div>
             </div>
@@ -79,12 +73,12 @@
                 <div class="quick-phrases">
                     <h3>Frasa Umum:</h3>
                     <div class="phrase-grid">
-                        <button class="btn secondary-btn" data-latin="saya sedang belajar" data-pegon="ساي سدڠ بلجر">Saya sedang belajar</button>
-                        <button class="btn secondary-btn" data-latin="apa kabar?" data-pegon="اڤا كابار؟">Apa kabar?</button>
-                        <button class="btn secondary-btn" data-latin="terima kasih" data-pegon="تريما كاسيه">Terima kasih</button>
-                        <button class="btn secondary-btn" data-latin="bagaimana kabarmu?" data-pegon="بڬيمان كابرمو؟">Bagaimana kabarmu?</button>
-                        <button class="btn secondary-btn" data-latin="selamat pagi" data-pegon="سلامت ڤڬي">Selamat pagi</button>
-                        <button class="btn secondary-btn" data-latin="mohon maaf" data-pegon="موهن ماف">Mohon maaf</button>
+                        <button type="button" class="btn secondary-btn" data-latin="saya sedang belajar" data-pegon="ساي سدڠ بلجر">Saya sedang belajar</button>
+                        <button type="button" class="btn secondary-btn" data-latin="apa kabar?" data-pegon="اڤا كابار؟">Apa kabar?</button>
+                        <button type="button" class="btn secondary-btn" data-latin="terima kasih" data-pegon="تريما كاسيه">Terima kasih</button>
+                        <button type="button" class="btn secondary-btn" data-latin="bagaimana kabarmu?" data-pegon="بڬيمان كابرمو؟">Bagaimana kabarmu?</button>
+                        <button type="button" class="btn secondary-btn" data-latin="selamat pagi" data-pegon="سلامت ڤڬي">Selamat pagi</button>
+                        <button type="button" class="btn secondary-btn" data-latin="mohon maaf" data-pegon="موهن ماف">Mohon maaf</button>
                     </div>
                 </div>
             </div>

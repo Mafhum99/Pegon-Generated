@@ -32,13 +32,7 @@ class PegonTranslator {
     // We'll handle these in the conversion process instead of using regex on Latin characters
     this.clusterRules = [];
     
-    // Harakah (diacritics) mapping when enabled
-    this.harakahMap = {
-      'a': 'َ',  // fatḥah
-      'i': 'ِ',  // kasrah
-      'u': 'ُ',  // ḍammah
-      'e': 'ۤ',  // pepet (for /ə/ sound)
-    };
+
 
     // Syllable pattern rules for proper Pegon conversion
     this.syllablePatterns = [
@@ -60,7 +54,7 @@ class PegonTranslator {
       { latin: 'silakan duduk', pegon: 'سلاكن دودوق' }
     ];
 
-    this.showHarakah = false; // Whether to show harakah/diacritics
+
     this.init();
   }
 
@@ -72,27 +66,18 @@ class PegonTranslator {
     this.clearInputBtn = document.getElementById('clear-input');
     this.clearOutputBtn = document.getElementById('clear-output');
     this.copyOutputBtn = document.getElementById('copy-output');
-    this.harakahToggle = document.getElementById('harakah-toggle');
+
     this.autoTranslateCheckbox = document.getElementById('auto-translate');
-    this.swapBtn = document.getElementById('swap-btn');
+
 
     // Set up event listeners
     this.translateBtn.addEventListener('click', () => this.translate());
     this.clearInputBtn.addEventListener('click', () => this.clearInput());
     this.clearOutputBtn.addEventListener('click', () => this.clearOutput());
     this.copyOutputBtn.addEventListener('click', () => this.copyToClipboard());
-    this.harakahToggle.addEventListener('change', (e) => {
-      this.showHarakah = e.target.checked;
-      // Re-translate to apply harakah changes if there's content
-      if (this.pegonOutput.textContent && !this.pegonOutput.textContent.includes('Silakan')) {
-        this.translate();
-      }
-    });
 
-    // Swap button functionality
-    if (this.swapBtn) {
-      this.swapBtn.addEventListener('click', () => this.swapText());
-    }
+
+
 
     // Also translate when pressing Enter (but not Shift+Enter)
     this.latinInput.addEventListener('keydown', (e) => {
@@ -132,31 +117,9 @@ class PegonTranslator {
     this.pegonOutput.dir = 'rtl';
   }
 
-  // Swap text between input and output
-  swapText() {
-    const currentInput = this.latinInput.value;
-    const currentOutput = this.pegonOutput.textContent;
-    
-    // We don't have reverse conversion, so we'll just swap content
-    // In a real implementation, this would convert Pegon back to Latin
-    this.latinInput.value = currentOutput;
-    this.pegonOutput.textContent = currentInput;
-    this.pegonOutput.classList.toggle('arabic-text');
-    this.pegonOutput.classList.toggle('pegon-text');
-    
-    // Update direction
-    if (this.containsArabicScript(currentInput)) {
-      this.pegonOutput.dir = 'rtl';
-    } else {
-      this.pegonOutput.dir = 'ltr';
-    }
-  }
 
-  // Check if text contains Arabic/Pegon script
-  containsArabicScript(text) {
-    // Check if the text contains Arabic characters (including Pegon extensions)
-    return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
-  }
+
+
 
   // Setup auto-translate option
   setupAutoTranslate() {
@@ -256,10 +219,7 @@ class PegonTranslator {
 
     result = convertedWords.join(' ');
 
-    // Apply harakah (diacritics) if enabled
-    if (this.showHarakah) {
-      result = this.addHarakah(result);
-    }
+
 
     return result;
   }
@@ -367,10 +327,7 @@ class PegonTranslator {
     // In Pegon script (Arabic-based), many short vowels are dropped for readability
     // This function removes unnecessary vowel diacritics while preserving meaning
     
-    // Skip vowel dropping if harakah is enabled
-    if (this.showHarakah) {
-      return text;
-    }
+
     
     let result = '';
     let words = text.split(' ');
@@ -426,22 +383,7 @@ class PegonTranslator {
     return text.replace(/\s+/g, ' ');
   }
 
-  // Add harakah (diacritics) to Pegon text - with pepet support
-  addHarakah(text) {
-    // Handle consonant + 'E' pattern for 'e' (pepet) sound
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)([E])/g, '$1ۤ');
-    text = text.replace(/[E]/g, 'ۤ');
-    
-    // Apply general vowel rules
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)ا/g, '$1َا');
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)ي/g, '$1ِي');
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)و/g, '$1ُو');
-    
-    // For standalone consonants (not followed by vowels), add sukun
-    text = text.replace(/(ب|ت|س|ج|ه|ك|ل|م|ن|ڤ|ر|ف|ق|ݢ|ڠ|ڽ|چ|خ|ش|ث|ذ|ز|ض|ظ|غ|ع|ح|ص|د)(?=\s|\.|,|;|:|!|\?|،|؟|۔|$|[^ا-ي])/g, '$1ْ');
 
-    return text;
-  }
 
   // Apply specific corrections for common Pegon patterns that result from vowel dropping
   applyPegonPatternCorrections(output) {
