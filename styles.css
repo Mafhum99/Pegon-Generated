@@ -54,17 +54,26 @@
   --dark-btn-text: #ffffff;
   --dark-btn-secondary-text: var(--dracula-foreground);
   
-  /* Define Amiri font for Arabic/Pegon text */
-  --arabic-font: 'Amiri', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Amiri Quran', 'Scheherazade New', 'Traditional Arabic', 'Arabic Typesetting', 'Arial Unicode MS', 'Tahoma', 'Harmattan', 'Changa', serif;
+  /* Define Amiri Quran font as primary for Arabic/Pegon text */
+  --arabic-font: 'Amiri Quran', 'Amiri', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Scheherazade New', 'Traditional Arabic', 'Arabic Typesetting', 'Arial Unicode MS', 'Tahoma', 'Harmattan', 'Changa', serif;
 }
 
-/* Define Amiri font for Arabic/Pegon text */
+/* Define Amiri Quran font as primary font for Arabic/Pegon text */
+@font-face {
+  font-family: 'Amiri Quran';
+  src: url('./Assets/font/AmiriQuran-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap; /* Ensures text remains visible during font loading */
+}
+
+/* Define Amiri font as secondary option */
 @font-face {
   font-family: 'Amiri';
   src: url('./Assets/font/AmiriQuran-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
-  font-display: swap; /* Ensures text remains visible during font loading */
+  font-display: swap;
 }
 
 /* Define Noto Sans Arabic font for better character support */
