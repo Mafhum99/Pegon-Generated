@@ -1,7 +1,7 @@
 // Bidirectional Latin ↔ Pegon Translator - JavaScript ES6 Implementation
 
 class PegonTranslator {
-  constructor() {
+  constructor(isCLI = false) {
     // Latin to Pegon conversion mapping based on correct Pegon script rules
     this.latinToPegonMap = {
       // Basic consonants
@@ -54,8 +54,15 @@ class PegonTranslator {
       { latin: 'silakan duduk', pegon: 'سلاكن دودوق' }
     ];
 
+    // Arabic terms will be loaded from JSON file into this object.
+    // Start empty; `loadArabicTerms()` will populate it for Node/browser.
+    this.arabicTerms = {};
 
-    this.init();
+
+    // Initialize differently based on environment
+    if (!isCLI) {
+      this.init();
+    }
   }
 
   init() {
@@ -95,6 +102,50 @@ class PegonTranslator {
 
     // Auto-translate option (default to checked)
     this.setupAutoTranslate();
+
+    // Load Arabic/ Pegon term mappings from JSON (Assets/kamus/serapan-kata-arab.json)
+    // This will populate `this.arabicTerms` asynchronously in browser or synchronously in Node.
+    this.loadArabicTerms();
+  }
+
+  // Load Arabic term mappings from the project's JSON file.
+  // - In Node.js: load synchronously from disk if available.
+  // - In browser: attempt fetch from relative path `./Assets/kamus/serapan-kata-arab.json`.
+  loadArabicTerms() {
+    // Node.js environment
+    if (typeof module !== 'undefined' && module.exports) {
+      try {
+        const fs = require('fs');
+        const path = require('path');
+        const jsonPath = path.join(__dirname, 'Assets', 'kamus', 'serapan-kata-arab.json');
+
+        if (fs.existsSync(jsonPath)) {
+          const fileContent = fs.readFileSync(jsonPath, 'utf8');
+          const loadedTerms = JSON.parse(fileContent);
+          this.arabicTerms = loadedTerms || {};
+        }
+      } catch (e) {
+        console.warn('Could not load Arabic terms from JSON file (Node):', e.message);
+        this.arabicTerms = {};
+      }
+      return;
+    }
+
+    // Browser environment - try fetching the JSON file
+    const jsonUrl = './Assets/kamus/serapan-kata-arab.json';
+    fetch(jsonUrl)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        this.arabicTerms = data || {};
+      })
+      .catch(err => {
+        // If fetching fails, keep arabicTerms empty (fallback behavior)
+        console.warn('Could not load Arabic terms from JSON file (browser):', err.message);
+        this.arabicTerms = {};
+      });
   }
 
   // Setup quick phrase buttons
@@ -226,6 +277,17 @@ class PegonTranslator {
 
   // Convert a single word to Pegon with proper syllable rules
   convertWordToPegon(word) {
+    // Check if the word starts with a vowel and handle initial vowel properly
+    let startsWithVowel = /^[aeiou]/.test(word.toLowerCase());
+    
+    // Load Arabic terms from the JSON file or use the default list
+    const arabicTerms = this.getArabicTerms();
+    
+    const lowerWord = word.toLowerCase();
+    if (arabicTerms[lowerWord]) {
+      return arabicTerms[lowerWord];
+    }
+    
     // First pass: replace all digraphs and trigraphs
     let result = word.toLowerCase();
     
@@ -259,8 +321,13 @@ class PegonTranslator {
       } 
       // Handle vowels - convert all Latin vowels to Arabic equivalents
       else if (vowels.includes(char)) {
-        // Always convert Latin vowels to Arabic/Pegon equivalents
-        finalResult += this.convertVowelToPegon(char);
+        // If this is the first character of the word and starts with a vowel, use special initial form
+        if (i === 0 && startsWithVowel) {
+          finalResult += this.handleInitialVowel(char);
+        } else {
+          // Always convert Latin vowels to Arabic/Pegon equivalents
+          finalResult += this.convertVowelToPegon(char);
+        }
       } 
       // Non-alphabetic characters
       else {
@@ -311,9 +378,19 @@ class PegonTranslator {
 
   // Handle initial vowels in Pegon (add alif)
   handleInitialVowel(vowel) {
-    // In Pegon script, initial vowels are typically preceded by an alif (ا)
-    // This helps with proper pronunciation and script flow
-    return this.convertVowelToPegon(vowel);
+    // In Pegon script (Arabic-based), according to user requirement:
+    // For 'a' sound, we use أ (alif with hamza above) as specified by user
+    // For 'i' sound, we use إ (alif with hamza above) 
+    // For 'u' and 'o' sounds, we use أ (alif with hamza above)
+    const initialVowelMap = {
+      'a': 'أ',     // alif with hamza above for initial 'a' as per user requirement
+      'i': 'إي',     // alif with hamza above for initial 'i'
+      'u': 'أو',     // alif with hamza above for initial 'u'
+      'e': 'أ',     // typically 'a' sound in Pegon context
+      'o': 'أو'      // alif with hamza above for initial 'o'
+    };
+
+    return initialVowelMap[vowel] || 'أ'; // Default to alif with hamza above if not found
   }
 
   // Handle final vowels in Pegon
@@ -484,21 +561,182 @@ class PegonTranslator {
       }
     }
   }
+  
+  // Get Arabic terms from JSON file or default list
+  getArabicTerms() {
+    // Default Arabic terms - provided as fallback
+    const defaultArabicTerms = {
+      'allah': 'الله',
+      'bismillah': 'بسم الله',
+      'alhamdulillah': 'الحمد لله',
+      'insyaallah': 'إن شاء الله',
+      'masyaallah': 'ما شاء الله',
+      'subhanallah': 'سبحان الله',
+      'astaghfirullah': 'أستغفر الله',
+      'alayhisallam': 'عليه السلام',
+      'rahimahullah': 'رحمه الله',
+      'rahmatullah': 'رحمت الله',
+      'muhammad': 'محمد',
+      'rasulullah': 'رسول الله',
+      'sallallahu alayhi wa sallam': 'صلى الله عليه و سلم',
+      'amin': 'آمين',
+      'aamiin': 'آمين',
+      'assalamualaikum': 'السلام عليكم',
+      'waalaikumsalam': 'و عليكم السلام'
+    };
+
+    // Check if we're in Node.js environment
+    if (typeof module !== 'undefined' && module.exports) {
+      try {
+        // Load from JSON file in Node.js
+        const fs = require('fs');
+        const path = require('path');
+        const jsonPath = path.join(__dirname, 'Assets', 'kamus', 'serapan-kata-arab.json');
+        
+        if (fs.existsSync(jsonPath)) {
+          const fileContent = fs.readFileSync(jsonPath, 'utf8');
+          const loadedTerms = JSON.parse(fileContent);
+          return loadedTerms;
+        }
+      } catch (e) {
+        // If there's an error loading the file, use defaults
+        console.warn('Could not load Arabic terms from JSON file, using defaults:', e.message);
+      }
+    } else {
+      // Browser environment - try to load via fetch or use defaults
+      // For browser environments, we'll use the defaults for now
+      // In a production environment, this could be loaded via fetch
+    }
+
+    return defaultArabicTerms;
+  }
 }
 
-// Initialize the translator when the DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  const translator = new PegonTranslator();
+// Function to display help information
+function showHelp() {
+  console.log(`
+Pegon Translator CLI - Command Line Interface
 
-  // Add download button
-  const downloadBtn = document.createElement('button');
-  downloadBtn.className = 'btn secondary-btn';
-  downloadBtn.id = 'download-output';
-  downloadBtn.textContent = 'Unduh Teks';
-  downloadBtn.addEventListener('click', () => translator.downloadTranslation());
+Usage:
+  pegon-generated [options] [text]
 
-  const outputControls = document.querySelector('.output-controls');
-  if (outputControls) {
-    outputControls.appendChild(downloadBtn);
+Options:
+  -v,--v, --version      Show version information
+  -h, --help, --h    Show this help information
+  --man              Show manual page
+
+Examples:
+  pegon-generated "apa kabar"     # Convert "apa kabar" to Pegon
+  pegon-generated "saya sedang belajar"  # Convert longer text
+  pegon-generated --help          # Show this help
+
+Description:
+  Translates Latin text to Pegon script (Arabic-based writing system).
+  Pegon is used for writing Javanese, Sundanese, Madurese and other local languages of Indonesia.
+`);
+}
+
+// Function to display version information
+function showVersion() {
+  console.log('Pegon Generated - Version 1.0.0');
+}
+
+// Function to display manual page
+function showManPage() {
+  console.log(`
+MANUAL PAGE FOR PEGON-GENERATED CLI TOOL
+
+NAME
+  pegon-generated - Latin to Pegon script translator
+
+SYNOPSIS
+  pegon-generated [OPTIONS] [TEXT]
+
+DESCRIPTION
+  The pegon-generated command translates Latin text to Pegon script.
+  Pegon is an Arabic-based writing system used for writing various
+  Indonesian local languages such as Javanese, Sundanese, and Madurese.
+
+OPTIONS
+  -v, --v, --version
+    Display version information
+  -h, --help, --h
+    Display help information
+
+  --man
+    Display this manual page
+
+USAGE EXAMPLE
+  $ pegon-generated "apa kabar"
+  اڤا كابار
+
+  $ pegon-generated "saya sedang belajar"
+  ساي سدڠ بلجر
+
+AUTHOR
+  Written by Andi Almafhum for cultural preservation
+
+COPYRIGHT
+  This is an open-source tool for preserving Indonesian local languages and scripts.
+`);
+}
+
+// Main function to handle CLI arguments when running in Node.js
+function main() {
+  const args = process.argv.slice(2);
+
+  // Check for help flags
+  if (args.includes('-h') || args.includes('--help') || args.includes('--h')) {
+    showHelp();
+    return;
   }
-});
+  // Check for version flags
+  if (args.includes('-v')|| args.includes('--v') ||args.includes('--version')) {
+    showVersion();
+    return;
+  }
+
+  // Check for man flag
+  if (args.includes('--man')) {
+    showManPage();
+    return;
+  }
+
+  // If no arguments provided, show help
+  if (args.length === 0) {
+    showHelp();
+    return;
+  }
+
+  // Join all remaining arguments as input text
+  const inputText = args.join(' ');
+
+  // Create translator instance and translate the text
+  const translator = new PegonTranslator();
+  const result = translator.convertToPegon(inputText); // Use the translate method without UI elements
+
+  // Output the result to stdout
+  console.log(result);
+}
+
+// Export the class for use in Node.js environment
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { PegonTranslator };
+} else {
+  // Browser environment - Initialize the web UI
+  document.addEventListener('DOMContentLoaded', () => {
+    const translator = new PegonTranslator();
+
+    // Add download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'btn secondary-btn';
+    downloadBtn.id = 'download-output';
+    downloadBtn.textContent = 'Unduh Teks';
+    downloadBtn.addEventListener('click', () => translator.downloadTranslation());
+
+    const outputControls = document.querySelector('.output-controls');
+    if (outputControls) {
+      outputControls.appendChild(downloadBtn);
+    }
+  });
+}

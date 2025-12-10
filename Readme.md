@@ -18,6 +18,7 @@
 - 📝 **Input Teks Panjang**: Dukungan untuk teks panjang dengan karakter counter
 - 📄 **Salin & Unduh**: Fasilitas untuk menyalin dan mengunduh teks terjemahan
 - 🎨 **Desain Modern**: Tampilan glassmorphism yang cantik dan responsif
+- 💻 **CLI Interface**: Mendukung penggunaan melalui command line untuk otomatisasi dan integrasi
 - 💾 **Akses Offline**: Dapat digunakan tanpa koneksi internet berkat font lokal
 
 ## 📖 Apa Itu Pegon?
@@ -29,11 +30,33 @@
 - 📝 **Latin**: Saya sedang belajar bahasa Pegon
 - ✍️ **Pegon**: ساي سدڠ بلجر بهسا ڤيڬون
 
-## 🛠️ Teknologi yang Digunakan
+## 🖥️ CLI (Command Line Interface) Support
+
+✨ Aplikasi ini juga mendukung penggunaan melalui Command Line Interface (CLI) untuk pengguna terminal!
+
+### 🚀 Cara Menggunakan CLI
+
+- 📥 **Instalasi**: Pastikan Anda telah menginstal Node.js di sistem Anda
+- 📁 **Jalankan CLI**: Gunakan perintah `node pegon-generated [text]` untuk menerjemahkan teks
+
+### ⚙️ Opsi CLI yang Tersedia
+
+- 🆘 `--help` / `-h` / `--h`: Menampilkan bantuan dan informasi penggunaan
+- 🏷️ `--version` / `-v` / `--v`: Menampilkan informasi versi aplikasi
+- 📖 `--man`: Menampilkan halaman manual lengkap
+
+### 📝 Contoh Penggunaan CLI
+
+- 💬 `node pegon-generated "apa kabar"` - Menerjemahkan "apa kabar" ke Pegon → `اڤا كابار`
+- 💬 `node pegon-generated "saya sedang belajar"` - Menerjemahkan teks panjang → `ساي سدڠ بلجر`
+- ❓ `node pegon-generated --help` - Menampilkan bantuan penggunaan CLI
+
+### 🛠️ Teknologi yang Digunakan
 
 - 🌐 **HTML5** - Struktur halaman web
 - 🎨 **CSS3** - Desain antarmuka dengan efek glassmorphism
 - ⚙️ **JavaScript (ES6)** - Logika penerjemahan dan interaksi pengguna
+- 🖥️ **Node.js** - Platform untuk CLI interface
 - 📦 **Offline Support** - Aplikasi dapat diakses tanpa koneksi internet
 
 ## 🔌 Mode Offline
@@ -52,6 +75,8 @@ Aplikasi ini mendukung mode offline sepenuhnya! Semua font dan aset diperlukan d
 
 ## 📱 Cara Menggunakan
 
+### 🌐 Versi Web
+
 1. 📥 **Input Teks Latin**: Masukkan teks dalam bahasa Latin di panel input
 2. 🔄 **Terjemahkan**: Klik tombol "Terjemahkan →" atau tekan Enter
 3. 📤 **Lihat Hasil**: Hasil terjemahan Pegon muncul di area output
@@ -59,6 +84,14 @@ Aplikasi ini mendukung mode offline sepenuhnya! Semua font dan aset diperlukan d
 5. 📋 **Gunakan Frasa Cepat**: Klik tombol frasa umum untuk mencoba contoh
 6. 📋 **Salin Teks**: Gunakan tombol "Salin Teks" untuk menyalin hasil terjemahan
 7. 📥 **Unduh Teks**: Gunakan tombol "Unduh Teks" untuk menyimpan hasil terjemahan
+
+### 💻 Versi CLI (Command Line Interface)
+
+1. 🖥️ **Buka Terminal**: Buka aplikasi terminal di sistem Anda
+2. 📁 **Navigasi ke Direktori**: Pindah ke direktori project menggunakan perintah `cd`
+3. 📝 **Masukkan Perintah**: Ketik `node pegon-generated [teks yang ingin diterjemahkan]`
+4. 🔄 **Dapatkan Hasil**: Teks Pegon akan ditampilkan langsung di terminal
+5. ❓ **Bantuan**: Gunakan `node pegon-generated --help` untuk melihat semua opsi yang tersedia
 
 ## 🔧 Fungsi Tambahan
 
@@ -73,6 +106,22 @@ Aplikasi ini mendukung mode offline sepenuhnya! Semua font dan aset diperlukan d
 - 🎓 **Pendidikan**: Alat bantu belajar bahasa dan aksara lokal
 - 🌐 **Aksesibilitas**: Memudahkan pengguna dalam menulis dan membaca teks Pegon
 - 💻 **Digitalisasi**: Menyesuaikan aksara lokal dengan teknologi modern
+- 🛠️ **Flexibility**: Menyediakan antarmuka pengguna baik web maupun CLI untuk berbagai kebutuhan
+
+## 📦 Instalasi dan Persyaratan Sistem
+
+Untuk menggunakan versi CLI (Command Line Interface), pastikan sistem Anda telah memenuhi persyaratan berikut:
+
+- 🟢 **Node.js**: Versi 12.x atau lebih baru (untuk menjalankan CLI interface)
+- 💾 **Ruang Penyimpanan**: Kurang dari 10MB ruang kosong
+- 🖥️ **Sistem Operasi**: Windows, macOS, atau Linux yang kompatibel dengan Node.js
+
+### 📥 Langkah-langkah Instalasi CLI
+
+1. 📂 **Clone atau unduh** repositori ini ke komputer Anda
+2. 📁 **Navigasi** ke direktori project menggunakan terminal
+3. ✅ **Pastikan Node.js terinstal** dengan mengecek `node --version`
+4. ▶️ **Jalankan perintah** `node pegon-generated "contoh teks"` untuk percobaan awal
 
 ## 🧠 Algoritma Penerjemahan
 

@@ -1,0 +1,120 @@
+#!/usr/bin/env node
+
+// Pegon Translator CLI - Command Line Interface
+// Converts Latin text to Pegon script
+// Uses the unified script for both web and CLI functionality
+
+// Load the unified translator class
+const { PegonTranslator } = require('./script.js');
+
+// Function to display help information
+function showHelp() {
+  console.log(`
+Pegon Translator CLI - Command Line Interface
+
+Usage:
+  pegon-generated [options] [text]
+
+Options:
+  -v,--v, --version  Show version information 
+  -h, --help, --h    Show this help information
+  --man              Show manual page
+
+Examples:
+  pegon-generated "apa kabar"     # Convert "apa kabar" to Pegon
+  pegon-generated "saya sedang belajar"  # Convert longer text
+  pegon-generated --help          # Show this help
+
+Description:
+  Translates Latin text to Pegon script (Arabic-based writing system).
+  Pegon is used for writing Javanese, Sundanese, Madurese and other local languages of Indonesia.
+`);
+}
+
+// Function to display version information
+function showVersion() {
+  console.log('Pegon Generated - Version 1.0.0 (Long Term Support)');
+}
+
+// Function to display manual page
+function showManPage() {
+  console.log(`
+MANUAL PAGE FOR PEGON-GENERATED CLI TOOL
+
+NAME
+  pegon-generated - Latin to Pegon script translator
+
+SYNOPSIS
+  pegon-generated [OPTIONS] [TEXT]
+
+DESCRIPTION
+  The pegon-generated command translates Latin text to Pegon script.
+  Pegon is an Arabic-based writing system used for writing various
+  Indonesian local languages such as Javanese, Sundanese, and Madurese.
+
+OPTIONS
+  -v, --version, --v
+    Display version information
+
+  -h, --help, --h
+    Display help information
+
+  --man
+    Display this manual page
+
+USAGE EXAMPLE
+  $ pegon-generated "apa kabar"
+  اڤا كابار
+
+  $ pegon-generated "saya sedang belajar"
+  ساي سدڠ بلجر
+
+AUTHOR
+  Written by Andi Almafhum for cultural preservation
+
+COPYRIGHT
+  This is an open-source tool for preserving Indonesian local languages and scripts.
+`);
+}
+
+// Main function to handle CLI arguments
+function main() {
+  const args = process.argv.slice(2);
+
+  // Check for help flags
+  if (args.includes('-h') || args.includes('--help') || args.includes('--h')) {
+    showHelp();
+    process.exit(0);
+  }
+
+  // Check for version flags
+  if (args.includes('-v') || args.includes('--v') || args.includes('--version')) {
+    showVersion();
+    process.exit(0);
+  }
+
+  // Check for man flag
+  if (args.includes('--man')) {
+    showManPage();
+    process.exit(0);
+  }
+
+  // If no arguments provided, show help
+  if (args.length === 0) {
+    showHelp();
+    process.exit(1);
+  }
+
+  // Join all remaining arguments as input text
+  const inputText = args.join(' ');
+
+  // Create translator instance for CLI (without UI initialization) and translate the text
+  const translator = new PegonTranslator(true); // true indicates CLI mode
+  const result = translator.convertToPegon(inputText); // Use the translate method without UI elements
+
+  // Output the result to stdout
+  console.log(result);
+}
+
+// Run the main function
+main();
