@@ -146,6 +146,15 @@ contri 🤝 busi sangat dihargai! Jika Anda ingin membantu mengembangkan aplikas
 
 Proyek ini dilisensikan di bawah Lisensi MIT - lihat file [LICENSE](LICENSE) untuk detail selengkapnya.
 
+🎉 **Boleh mengembangkan sesukanya!** Kode ini bersifat *open source* dan siapa pun dipersilakan untuk:
+- 🔄 Menggunakan kembali kode ini untuk proyek lain
+- 🛠️ Memodifikasi sesuai kebutuhan
+- 🚀 Mengembangkan fitur-fitur baru
+- 🤝 Berkontribusi pada pengembangan proyek ini
+- 📦 Mendistribusikan kembali dalam bentuk apapun
+
+Lisensi MIT memberikan kebebasan penuh kepada pengguna untuk mengembangkan dan memanfaatkan aplikasi ini sesuai dengan kebutuhan mereka.
+
 ## ✨ Penghargaan
 
 Dibuat dengan ❤️ untuk pelestarian budaya dan bahasa lokal Indonesia.

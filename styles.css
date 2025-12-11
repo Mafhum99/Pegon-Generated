@@ -165,6 +165,23 @@ body {
   margin-bottom: 30px;
 }
 
+/* Tablet layout */
+@media (min-width: 768px) and (max-width: 991px) {
+  .main-content {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .translator-container {
+    flex-direction: column;
+  }
+
+  .input-section,
+  .output-section {
+    width: 100%;
+  }
+}
+
 @media (min-width: 992px) {
   .main-content {
     grid-template-columns: 2fr 1fr;
@@ -205,6 +222,7 @@ body {
 textarea {
   width: 100%;
   min-height: 200px;
+  max-height: 400px;
   padding: 15px;
   border: 1px solid var(--glass-border);
   border-radius: 12px;
@@ -212,9 +230,10 @@ textarea {
   color: var(--text-primary);
   font-size: 1rem;
   font-family: var(--arabic-font), 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  resize: vertical;
+  resize: none;
   transition: all 0.3s ease;
   backdrop-filter: blur(4px);
+  overflow-y: auto;
 }
 
 textarea:focus {
@@ -227,6 +246,7 @@ textarea:focus {
 .output-display {
   width: 100%;
   min-height: 200px;
+  max-height: 400px;
   padding: 15px;
   border: 1px solid var(--glass-border);
   border-radius: 12px;
@@ -245,6 +265,19 @@ textarea:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* Styling for readonly output textarea */
+.output-display[readonly] {
+  cursor: default;
+  resize: none;
+}
+
+/* Placeholder text styling */
+.placeholder-text {
+  color: var(--text-secondary);
+  font-style: italic;
+  cursor: default;
 }
 
 /* Buttons */
@@ -300,24 +333,66 @@ textarea:focus {
   border-radius: 8px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
 
-.auto-translate-container label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.auto-translate-container .switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.auto-translate-container .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.auto-translate-container .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.auto-translate-container .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.auto-translate-container input:checked + .slider {
+  background-color: var(--btn-primary-bg);
+}
+
+.auto-translate-container input:checked + .slider:before {
+  transform: translateX(26px);
+}
+
+.auto-translate-container .toggle-label {
   font-size: 0.9rem;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
-.auto-translate-container input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
+.help-text {
+  font-size: 0.8rem;
+  color: var(--dark-text-secondary);
+  margin-top: 5px;
+  display: block;
 }
-
-
 
 .section-header {
   display: flex;
@@ -499,6 +574,42 @@ textarea:focus {
   margin-bottom: 10px;
 }
 
+/* Placeholder text styling */
+.placeholder-text {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Utility classes and overrides for inline styles */
+.centered-header {
+  justify-content: center;
+}
+
+.header-content {
+  display: inline;
+  text-align: center;
+}
+
+.latin-input {
+  font-size: 24px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.output-display.large-text {
+  font-size: 24px;
+}
+
+.mt-15 {
+  margin-top: 15px;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 10px;
+  margin-left: 0;
+  margin-right: 0;
+}
+
 /* Loading animation */
 .loading {
   display: inline-block;
@@ -529,11 +640,17 @@ textarea:focus {
   color: var(--dracula-purple);
 }
 
-textarea,
+textarea {
+  background: rgba(52, 55, 70, 0.3);
+  color: var(--dark-text-primary);
+  border: 1px solid var(--dark-glass-border);
+}
+
 .output-display {
   background: rgba(52, 55, 70, 0.3);
   color: var(--dark-text-primary);
   border: 1px solid var(--dark-glass-border);
+  max-height: 400px;
 }
 
 textarea:focus,
@@ -541,6 +658,10 @@ textarea:focus,
   border-color: var(--dark-accent-primary);
   box-shadow: 0 0 0 3px rgba(189, 147, 249, 0.2);
   background: rgba(52, 55, 70, 0.4);
+}
+
+.output-display[readonly] {
+  cursor: default;
 }
 
 .primary-btn {
@@ -573,8 +694,12 @@ textarea:focus,
   background: rgba(52, 55, 70, 0.2);
 }
 
-.auto-translate-container label {
+.auto-translate-container .toggle-label {
   color: var(--dark-text-secondary);
+}
+
+.auto-translate-container input:checked + .slider {
+  background-color: var(--dark-btn-primary-bg);
 }
 
 .info-section p {
@@ -650,4 +775,300 @@ textarea:focus,
 #pegon-output {
   /* Explicitly target the special characters used in Pegon that may not be in all fonts */
   font-family: var(--arabic-font) !important; 
+}
+
+/* Cheatsheet Full-Screen Modal Styles */
+.full-screen-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--dark-bg-primary);
+  z-index: 1000;
+  flex-direction: column;
+}
+
+.full-screen-modal.active {
+  display: flex;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid var(--dark-glass-border);
+  background: var(--dark-glass-bg);
+  flex-shrink: 0;
+  z-index: 1001; /* Ensure header stays above content */
+}
+
+.modal-header h2 {
+  color: var(--dark-accent-primary);
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.close-btn {
+  background: var(--dark-btn-secondary-bg);
+  color: var(--dark-btn-secondary-text);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.close-btn:hover {
+  background: var(--dark-btn-secondary-hover);
+}
+
+.modal-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cheatsheet-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  height: 100%;
+}
+
+.cheatsheet-section-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--dark-accent-primary);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--dark-glass-border);
+  margin-top: 10px;
+}
+
+.cheatsheet-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.cheatsheet-row.examples {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.cheatsheet-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: var(--dark-glass-bg);
+  border: 1px solid var(--dark-glass-border);
+  border-radius: 8px;
+  text-align: center;
+  min-height: 60px;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.cheatsheet-cell:hover {
+  background: var(--dark-btn-secondary-hover);
+  transform: translateY(-2px);
+}
+
+.cheatsheet-cell span {
+  display: block;
+  width: 100%;
+}
+
+.latin-char {
+  font-size: 0.9rem;
+  color: var(--dark-text-secondary);
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+.arabic-char {
+  font-size: 1.4rem;
+  color: var(--dark-accent-primary);
+  font-family: var(--arabic-font);
+  line-height: 1.2;
+}
+
+.cheatsheet-cell-example {
+  padding: 12px;
+  background: var(--dark-glass-bg);
+  border: 1px solid var(--dark-glass-border);
+  border-radius: 8px;
+  text-align: center;
+  min-height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cheatsheet-cell-example:hover {
+  background: var(--dark-btn-secondary-hover);
+}
+
+.example-text {
+  font-size: 0.9rem;
+  color: var(--dark-text-primary);
+  line-height: 1.4;
+  font-family: var(--arabic-font);
+}
+
+/* Android and mobile-specific styles for better scrolling */
+@media screen and (max-width: 768px) {
+  .cheatsheet-row {
+    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+    gap: 8px;
+  }
+
+  .cheatsheet-row.examples {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+
+  .cheatsheet-cell {
+    min-height: 55px;
+    padding: 8px;
+  }
+
+  .latin-char {
+    font-size: 0.8rem;
+  }
+
+  .arabic-char {
+    font-size: 1.2rem;
+  }
+
+  .cheatsheet-section-title {
+    font-size: 1rem;
+  }
+
+  .example-text {
+    font-size: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .modal-header {
+    padding: 15px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .close-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 1.3rem;
+  }
+
+  .modal-body {
+    padding: 15px;
+  }
+
+  .cheatsheet-row {
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 6px;
+  }
+
+  .cheatsheet-row.examples {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+
+  .cheatsheet-cell {
+    min-height: 50px;
+    padding: 6px;
+  }
+
+  .latin-char {
+    font-size: 0.7rem;
+  }
+
+  .arabic-char {
+    font-size: 1rem;
+  }
+
+  .cheatsheet-cell-example {
+    min-height: 60px;
+    padding: 8px;
+  }
+
+  .example-text {
+    font-size: 0.7rem;
+  }
+}
+
+/* Enhance touch support for Android */
+.cheatsheet-cell, .cheatsheet-cell-example {
+  -webkit-tap-highlight-color: rgba(189, 147, 249, 0.3);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Smooth scrolling for better mobile experience */
+.modal-body {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* About Pegon modal styling */
+
+
+.section-title {
+  color: var(--dark-accent-primary);
+  margin: 20px 0 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--dark-glass-border);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.info-section-content h3.section-title:first-child {
+  margin-top: 0;
+}
+
+.info-section-content p {
+  margin-bottom: 15px;
+  line-height: 1.6;
+  color: var(--dark-text-secondary);
+}
+
+.info-section-content ul {
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.info-section-content li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+  color: var(--dark-text-secondary);
+}
+
+.info-section-content ul li {
+  position: relative;
+}
+
+.info-section-content ul li:before {
+  content: "•";
+  color: var(--dark-accent-primary);
+  font-weight: bold;
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
 }

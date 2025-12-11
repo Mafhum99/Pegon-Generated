@@ -10,7 +10,7 @@ class PegonTranslator {
       'dz': 'ذ',  // For 'dz' sound in Javanese/Malay
       '‘': 'ع', '’': 'ع',  // Both apostrophes map to ain
       'ġ': 'غ', 'f': 'ف', 'q': 'ق', 'k': 'ك', 'g': 'ݢ', 'l': 'ل', 
-      'm': 'م', 'n': 'ن', 'ny': 'ڽ', 'ng': 'ڠ', 'h': 'ه', 'w': 'و', 'y': 'ي', 
+      'm': 'م', 'n': 'ن', 'ny': 'ۑ', 'ng': 'ڠ', 'h': 'ه', 'w': 'و', 'y': 'ي', 
       'z': 'ز', 'r': 'ر', 's': 'س', 'd': 'د', 'v': 'ڤ', 'p': 'ڤ',
       
       // Vowel combinations in Pegon
@@ -86,16 +86,25 @@ class PegonTranslator {
 
 
 
-    // Also translate when pressing Enter (but not Shift+Enter)
+    // Only translate when pressing Ctrl+Enter or Cmd+Enter (for manual translation)
     this.latinInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
         this.translate();
       }
     });
 
     // Update character count as user types
-    this.latinInput.addEventListener('input', () => this.updateCharacterCount());
+    this.latinInput.addEventListener('input', () => {
+      this.updateCharacterCount();
+      // Auto-translate if enabled
+      if (this.autoTranslateCheckbox && this.autoTranslateCheckbox.checked) {
+        clearTimeout(this.autoTranslateTimeout);
+        this.autoTranslateTimeout = setTimeout(() => {
+          this.translate();
+        }, 1000);
+      }
+    });
 
     // Set up quick phrase buttons
     this.setupQuickPhrases();
@@ -163,8 +172,9 @@ class PegonTranslator {
   // Fill example text
   fillExample(latin, pegon) {
     this.latinInput.value = latin;
-    this.pegonOutput.textContent = pegon;
+    this.pegonOutput.value = pegon;
     this.pegonOutput.classList.add('arabic-text', 'pegon-text');
+    this.pegonOutput.classList.remove('placeholder-text'); // Remove placeholder styling if present
     this.pegonOutput.dir = 'rtl';
   }
 
@@ -172,33 +182,7 @@ class PegonTranslator {
 
 
 
-  // Setup auto-translate option
-  setupAutoTranslate() {
-    // Add event listener for auto-translate
-    const autoTranslateCheckbox = document.getElementById('auto-translate');
-    if (autoTranslateCheckbox) {
-      autoTranslateCheckbox.addEventListener('change', (e) => {
-        if (e.target.checked) {
-          this.latinInput.addEventListener('input', this.debounce(() => this.translate(), 1000));
-        } else {
-          this.latinInput.removeEventListener('input', this.debounce(() => this.translate(), 1000));
-        }
-      });
-    }
-  }
 
-  // Debounce function to limit translation calls
-  debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
 
   // Update character count
   updateCharacterCount() {
@@ -222,24 +206,26 @@ class PegonTranslator {
   translate() {
     const inputText = this.latinInput.value.trim();
     if (!inputText) {
-      this.pegonOutput.textContent = 'Silakan masukkan teks untuk diterjemahkan.';
+      this.pegonOutput.value = 'Hasil terjemahan Pegon akan muncul di sini...';
       this.pegonOutput.dir = 'ltr';
       this.pegonOutput.classList.remove('arabic-text', 'pegon-text');
+      this.pegonOutput.classList.add('placeholder-text');
       return;
     }
 
     try {
       // Show loading state
-      this.pegonOutput.innerHTML = '<span class="loading"></span> Menterjemahkan...';
+      this.pegonOutput.value = 'Menterjemahkan...';
 
       // Convert using proper Pegon conversion rules
       setTimeout(() => {
         const convertedText = this.convertToPegon(inputText);
 
-        this.pegonOutput.textContent = convertedText;
+        this.pegonOutput.value = convertedText;
 
         // Set RTL direction and Arabic font for Pegon output
         this.pegonOutput.classList.add('arabic-text', 'pegon-text');
+        this.pegonOutput.classList.remove('placeholder-text'); // Remove placeholder styling
         this.pegonOutput.dir = 'rtl';
       }, 300);
     } catch (error) {
@@ -253,24 +239,31 @@ class PegonTranslator {
     // First normalize the text: handle special combinations
     let result = text.toLowerCase();
 
-    // Process each word separately to maintain proper syllable structure
-    let words = result.split(' ');
-    let convertedWords = [];
+    // Process each line separately to maintain line breaks
+    let lines = result.split('\n');
+    let convertedLines = [];
 
-    for (let word of words) {
-      if (word.length === 0) {
-        convertedWords.push('');
-        continue;
+    for (let line of lines) {
+      // Process each word in the line separately to maintain proper syllable structure
+      let words = line.split(' ');
+      let convertedWords = [];
+
+      for (let word of words) {
+        if (word.length === 0) {
+          convertedWords.push('');
+          continue;
+        }
+
+        // Apply proper syllable segmentation for Pegon
+        let convertedWord = this.convertWordToPegon(word);
+        convertedWords.push(convertedWord);
       }
 
-      // Apply proper syllable segmentation for Pegon
-      let convertedWord = this.convertWordToPegon(word);
-      convertedWords.push(convertedWord);
+      let convertedLine = convertedWords.join(' ');
+      convertedLines.push(convertedLine);
     }
 
-    result = convertedWords.join(' ');
-
-
+    result = convertedLines.join('\n');
 
     return result;
   }
@@ -297,7 +290,7 @@ class PegonTranslator {
     // Replace digraphs (like 'ng', 'ny', 'sy', 'kh', etc.)
     // We need to be careful about the order - longer matches first
     result = result.replace(/ng/g, 'ڠ');
-    result = result.replace(/ny/g, 'ڽ');
+    result = result.replace(/ny/g, 'ۑ');
     result = result.replace(/sy/g, 'ش');
     result = result.replace(/sh/g, 'ش');
     result = result.replace(/kh/g, 'خ');
@@ -487,13 +480,14 @@ class PegonTranslator {
   }
 
   clearOutput() {
-    this.pegonOutput.textContent = '';
+    this.pegonOutput.value = '';
     this.pegonOutput.dir = '';
     this.pegonOutput.classList.remove('arabic-text', 'pegon-text');
+    this.pegonOutput.classList.add('placeholder-text');
   }
 
   copyToClipboard() {
-    const text = this.pegonOutput.textContent;
+    const text = this.pegonOutput.value;
     if (!text || text.includes('Silakan masukkan')) return;
 
     navigator.clipboard.writeText(text)
@@ -513,8 +507,8 @@ class PegonTranslator {
 
   // Download translated text as file
   downloadTranslation() {
-    const text = this.pegonOutput.textContent;
-    if (!text || text.includes('Silakan masukkan')) {
+    const text = this.pegonOutput.value;
+    if (!text || text.includes('Silakan masukkan') || text.includes('Hasil terjemahan')) {
       alert('Tidak ada teks untuk diunduh.');
       return;
     }
@@ -533,32 +527,16 @@ class PegonTranslator {
     // Check the auto-translate checkbox by default
     if (this.autoTranslateCheckbox) {
       this.autoTranslateCheckbox.checked = true;
+      this.autoTranslateTimeout = null;
 
-      // Add event listener for auto-translate
-      let autoTranslateTimeout;
+      // Add event listener for auto-translate checkbox
       this.autoTranslateCheckbox.addEventListener('change', (e) => {
-        if (e.target.checked) {
-          this.latinInput.addEventListener('input', () => {
-            clearTimeout(autoTranslateTimeout);
-            autoTranslateTimeout = setTimeout(() => {
-              this.translate();
-            }, 1000);
-          });
-        } else {
+        if (!e.target.checked) {
           // Clear any pending timeout when auto-translate is disabled
-          clearTimeout(autoTranslateTimeout);
+          clearTimeout(this.autoTranslateTimeout);
         }
+        // When auto-translate is enabled, it will be triggered by the input event handler
       });
-
-      // Also trigger auto-translate by default since checkbox is checked
-      if (this.autoTranslateCheckbox.checked) {
-        this.latinInput.addEventListener('input', () => {
-          clearTimeout(autoTranslateTimeout);
-          autoTranslateTimeout = setTimeout(() => {
-            this.translate();
-          }, 1000);
-        });
-      }
     }
   }
   
@@ -638,7 +616,7 @@ Description:
 
 // Function to display version information
 function showVersion() {
-  console.log('Pegon Generated - Version 1.0.0');
+  console.log('Pegon Generated - Version 1.0.1 (Long Term Support)');
 }
 
 // Function to display manual page
@@ -711,17 +689,26 @@ function main() {
   // Join all remaining arguments as input text
   const inputText = args.join(' ');
 
-  // Create translator instance and translate the text
-  const translator = new PegonTranslator();
+  // Create translator instance and translate the text (with isCLI=true to avoid web UI initialization)
+  const translator = new PegonTranslator(true);
   const result = translator.convertToPegon(inputText); // Use the translate method without UI elements
 
+  // Post-process the result to ensure correct ny character in CLI mode
+  // Fix for "ny" to "ڽ" conversion (not "ۑ")
+  const correctedResult = result.replace(/ۑ/g, 'ڽ');
+
   // Output the result to stdout
-  console.log(result);
+  console.log(correctedResult);
 }
 
 // Export the class for use in Node.js environment
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { PegonTranslator };
+  
+  // Check if script is run directly (not required as a module)
+  if (require.main === module) {
+    main();
+  }
 } else {
   // Browser environment - Initialize the web UI
   document.addEventListener('DOMContentLoaded', () => {
@@ -731,12 +718,70 @@ if (typeof module !== 'undefined' && module.exports) {
     const downloadBtn = document.createElement('button');
     downloadBtn.className = 'btn secondary-btn';
     downloadBtn.id = 'download-output';
-    downloadBtn.textContent = 'Unduh Teks';
+    downloadBtn.textContent = ' ⬇️ Download';
     downloadBtn.addEventListener('click', () => translator.downloadTranslation());
 
     const outputControls = document.querySelector('.output-controls');
     if (outputControls) {
       outputControls.appendChild(downloadBtn);
     }
+    
+    // Cheatsheet modal functionality
+    const cheatsheetBtn = document.getElementById('cheatsheet-btn');
+    const modal = document.getElementById('cheatsheet-modal');
+    const closeModalBtn = document.getElementById('close-modal');
+    
+    // Open modal when button is clicked
+    if (cheatsheetBtn) {
+      cheatsheetBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      });
+    }
+    
+    // Close modal when close button is clicked
+    if (closeModalBtn) {
+      closeModalBtn.addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restore scrolling
+      });
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.classList.contains('active')) {
+        modal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restore scrolling
+      }
+    });
+    
+    // About Pegon modal functionality
+    const aboutPegonBtn = document.getElementById('about-pegon-btn');
+    const aboutModal = document.getElementById('about-pegon-modal');
+    const closeAboutModalBtn = document.getElementById('close-about-modal');
+
+    // Open About Pegon modal when button is clicked
+    if (aboutPegonBtn) {
+      aboutPegonBtn.addEventListener('click', () => {
+        aboutModal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+      });
+    }
+
+    // Close About Pegon modal when close button is clicked
+    if (closeAboutModalBtn) {
+      closeAboutModalBtn.addEventListener('click', () => {
+        aboutModal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restore scrolling
+      });
+    }
+
+    // Close About Pegon modal with Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && aboutModal.classList.contains('active')) {
+        aboutModal.classList.remove('active');
+        document.body.style.overflow = 'auto'; // Restore scrolling
+      }
+    });
   });
 }

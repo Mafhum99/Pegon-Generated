@@ -3,13 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Penerjemah Latin ↔ Pegon</title>
+    <title>Pegon Generated | Penerjemah Latin ↔ Pegon</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
-        <header class="glass-header">
-            <h1>Penerjemah Latin ↔ Pegon</h1>
+        <header class="glass-header centered-header">
+            <div class="header-content">
+<h1>Pegon Generated</h1>
+<div class="info-section"><p>(Penerjemah Latin ↔ Pegon)</p></div>
+            </div>
+            
+            
+            
+            
         </header>
 
         <main class="main-content">
@@ -18,57 +25,45 @@
                     <div class="section-header">
                         <h2>Teks Latin</h2>
                     </div>
-                    <textarea id="latin-input" style="font-size: 24px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;" placeholder="Masukkan teks dalam bahasa Latin di sini..."></textarea>
+                    <textarea id="latin-input" class="large-text latin-input" placeholder="Masukkan teks dalam bahasa Latin di sini..."></textarea>
                     <!-- Character counter will be added here by JavaScript -->
                     <div class="input-controls">
-                        <button id="translate-btn" class="btn primary-btn">Terjemahkan →</button>
-                        <button id="clear-input" class="btn secondary-btn">Bersihkan</button>
+                        <button id="translate-btn" class="btn primary-btn">🌍 Terjemahkan →</button>
+                        <button id="clear-input" class="btn secondary-btn">🧹 Bersihkan</button>
                     </div>
                     <div class="auto-translate-container">
-                        <label>
-                            <input type="checkbox" id="auto-translate" checked> Terjemahan Otomatis
+                        <label class="switch">
+                            <input type="checkbox" id="auto-translate" checked>
+                            <span class="slider round"></span>
                         </label>
+                        <span class="toggle-label">Terjemahan Otomatis</span>
                     </div>
+                    <small class="help-text">Gunakan <b>Ctrl+Enter</b> untuk menterjemahkan secara manual jika <b>Terjemah Otomatis</b> dalam keadaan mati atau <b>off</b></small>
                 </div>
 
                 <div class="output-section">
                     <div class="section-header">
                         <h2>Teks Pegon</h2>
                     </div>
-                    <div id="pegon-output" class="output-display" style="font-size: 24px;"  placeholder="Hasil terjemahan Pegon akan muncul di sini..."></div>
+                    <textarea id="pegon-output" class="output-display large-text" readonly></textarea>
                     <div class="output-controls">
-                        <button id="copy-output" class="btn secondary-btn">Salin Teks</button>
-                        <button id="clear-output" class="btn secondary-btn">Bersihkan</button>
+                        <button id="copy-output" class="btn secondary-btn">📋 Salin Teks</button>
+                        <button id="clear-output" class="btn secondary-btn">🧹 Bersihkan</button>
                     </div>
                 </div>
             </div>
 
             <div class="info-section glass-card">
-                <h2>Tentang Pegon</h2>
-                <p>Pegon adalah sistem penulisan berbasis Arab yang digunakan untuk menulis bahasa Jawa, Sunda, Madura, dan bahasa Indonesia lainnya. Script ini merupakan adaptasi dari abjad Arab untuk mengakomodasi bunyi-bunyi dalam bahasa lokal.</p>
+                <h2>Pegon Generated</h2>
+                <p>Version 1.0.1 (LTS)</p>
+                <p>Pegon Generated adalah sistem yang digunakan untuk menerjemahkan bahasa Jawa, Sunda, Madura, Melayu dan bahasa Indonesia lainnya yang ditulis dalam tulisan latin ke tulisan Arab Pegon. Versi ini merupakan versi Long Term Support (LTS) sehingga perkembangannya masih berlanjut. Distribusi bersifat open source dan boleh dikembangkan lagi.</p>
                 
                 <div class="examples">
-                    <h3>Contoh Dasar:</h3>
-                    <div class="example-item">
-                        <p><strong>Latin:</strong> saya sedang belajar</p>
-                        <p><strong>Pegon:</strong> ساي سدڠ بلجر</p>
-                    </div>
-                    <div class="example-item">
-                        <p><strong>Latin:</strong> terima kasih</p>
-                        <p><strong>Pegon:</strong> تريما كاسيه</p>
-                    </div>
+                    <h3>Ensiklopedia Arab Pegon:</h3>
+                    <button id="about-pegon-btn" class="btn secondary-btn mt-15 full-width">📄 Apa itu Arab Pegon ?</button>
+                    <button id="cheatsheet-btn" class="btn secondary-btn mt-15 full-width">📄 Cheatsheet Arab Pegon</button>
                 </div>
                 
-                <div class="pegon-rules">
-                    <h3>Aturan Dasar Pegon:</h3>
-                    <ul>
-                        <li>Huruf <strong>c</strong> direpresentasikan dengan <strong>چ</strong></li>
-                        <li>Huruf <strong>ng</strong> direpresentasikan dengan <strong>ڠ</strong></li>
-                        <li>Huruf <strong>ny</strong> direpresentasikan dengan <strong>ڽ</strong></li>
-                        <li>Huruf <strong>kh</strong> direpresentasikan dengan <strong>خ</strong></li>
-                        <li>Penggunaan harakah (diakritik) opsional tergantung kebutuhan</li>
-                    </ul>
-                </div>
                 
                 <div class="quick-phrases">
                     <h3>Frasa Umum:</h3>
@@ -76,27 +71,137 @@
                         <button type="button" class="btn secondary-btn" data-latin="saya sedang belajar" data-pegon="ساي سدڠ بلجر">Saya sedang belajar</button>
                         <button type="button" class="btn secondary-btn" data-latin="apa kabar?" data-pegon="اڤا كابار؟">Apa kabar?</button>
                         <button type="button" class="btn secondary-btn" data-latin="terima kasih" data-pegon="تريما كاسيه">Terima kasih</button>
-                        <button type="button" class="btn secondary-btn" data-latin="bagaimana kabarmu?" data-pegon="بڬيمان كابرمو؟">Bagaimana kabarmu?</button>
-                        <button type="button" class="btn secondary-btn" data-latin="selamat pagi" data-pegon="سلامت ڤڬي">Selamat pagi</button>
-                        <button type="button" class="btn secondary-btn" data-latin="mohon maaf" data-pegon="موهن ماف">Mohon maaf</button>
                         <button type="button" class="btn secondary-btn" data-latin="alhamdulillah" data-pegon="الحمد لله">Alhamdulillah</button>
                         <button type="button" class="btn secondary-btn" data-latin="subhanallah" data-pegon="سبحان الله">Subhanallah</button>
-                        <button type="button" class="btn secondary-btn" data-latin="masyaallah" data-pegon="ما شاء الله">Masyaallah</button>
-                        <button type="button" class="btn secondary-btn" data-latin="astaghfirullah" data-pegon="أستغفر الله">Astaghfirullah</button>
-                        <button type="button" class="btn secondary-btn" data-latin="allahu akbar" data-pegon="الله اكبر">Allahu Akbar</button>
-                        <button type="button" class="btn secondary-btn" data-latin="bismillah" data-pegon="بسم الله">Bismillah</button>
                         <button type="button" class="btn secondary-btn" data-latin="insyaallah" data-pegon="إن شاء الله">Insyaallah</button>
-                        <button type="button" class="btn secondary-btn" data-latin="la haula wala quwwata illa billah" data-pegon="لا حول ولا قوة الا بالله">La Haula Wala Quwwata Illa Billah</button>
-                        <button type="button" class="btn secondary-btn" data-latin="ya rabb" data-pegon="يا رب">Ya Rabb</button>
-                        <button type="button" class="btn secondary-btn" data-latin="ya allah" data-pegon="يا الله">Ya Allah</button>
                     </div>
                 </div>
             </div>
         </main>
 
         <footer class="glass-footer">
-            <p>Dibuat dengan ❤️ untuk pelestarian budaya dan bahasa lokal | © 2025 - By : Andi Almafhum</p>
+            <p>Dibuat dengan ❤️ untuk pelestarian budaya dan bahasa lokal | © 2025 - By : Andi Almafhum | <a href="https://saweria.co/mafhum" target="_blank" ><b>☕ Support</b></a></p> 
         </footer>
+    </div>
+
+    <!-- Cheatsheet Full-Screen Modal -->
+    <!-- Cheatsheet Full-Screen Modal -->
+    <div id="cheatsheet-modal" class="full-screen-modal">
+        <div class="modal-header">
+            <h2>Panduan Cepat Pegon</h2>
+            <button id="close-modal" class="close-btn" aria-label="Tutup">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="cheatsheet-grid">
+                <div class="cheatsheet-section-title">Huruf dan Transliterasi:</div>
+                <div class="cheatsheet-row">
+                    <div class="cheatsheet-cell"><span class="latin-char">b</span><span class="arabic-char">ب</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">t</span><span class="arabic-char">ت</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">j</span><span class="arabic-char">ج</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">ḥ</span><span class="arabic-char">ح</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">d</span><span class="arabic-char">د</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">r</span><span class="arabic-char">ر</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">z</span><span class="arabic-char">ز</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">s</span><span class="arabic-char">س</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">'</span><span class="arabic-char">ع</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">f</span><span class="arabic-char">ف</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">q</span><span class="arabic-char">ق</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">k</span><span class="arabic-char">ك</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">l</span><span class="arabic-char">ل</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">m</span><span class="arabic-char">م</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">n</span><span class="arabic-char">ن</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">w</span><span class="arabic-char">و</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">h</span><span class="arabic-char">ه</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">y</span><span class="arabic-char">ي</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">c</span><span class="arabic-char">چ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">g</span><span class="arabic-char">ݢ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">p</span><span class="arabic-char">ڤ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">v</span><span class="arabic-char">ڤ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">sh</span><span class="arabic-char">ش</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">sy</span><span class="arabic-char">ش</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">dz</span><span class="arabic-char">ذ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">kh</span><span class="arabic-char">خ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">ng</span><span class="arabic-char">ڠ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">ny</span><span class="arabic-char">ۑ</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">a</span><span class="arabic-char">ا</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">i</span><span class="arabic-char">ي</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">u</span><span class="arabic-char">و</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">e</span><span class="arabic-char">ا</span></div>
+                </div>
+                <div class="cheatsheet-section-title">Angka:</div>
+                <div class="cheatsheet-row">
+                    <div class="cheatsheet-cell"><span class="latin-char">0</span><span class="arabic-char">٠</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">1</span><span class="arabic-char">١</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">2</span><span class="arabic-char">٢</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">3</span><span class="arabic-char">٣</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">4</span><span class="arabic-char">٤</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">5</span><span class="arabic-char">٥</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">6</span><span class="arabic-char">٦</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">7</span><span class="arabic-char">٧</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">8</span><span class="arabic-char">٨</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">9</span><span class="arabic-char">٩</span></div>
+                </div>
+                <div class="cheatsheet-section-title">Tanda Baca:</div>
+                <div class="cheatsheet-row">
+                    <div class="cheatsheet-cell"><span class="latin-char">?</span><span class="arabic-char">؟</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">.</span><span class="arabic-char">۔</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">,</span><span class="arabic-char">،</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">!</span><span class="arabic-char">!</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">;</span><span class="arabic-char">؛</span></div>
+                    <div class="cheatsheet-cell"><span class="latin-char">:</span><span class="arabic-char">:</span></div>
+                </div>
+
+
+                <div class="cheatsheet-section-title">Contoh Penggunaan:</div>
+                <div class="cheatsheet-row examples">
+                    <div class="cheatsheet-cell-example"><span class="example-text">saya → ساي</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">hanya → هاڽا</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">sedang → سدڠ</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">belajar → بلجر</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">apa kabar? → اڤا كابار؟</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">terima kasih → تريما كاسيه</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">selamat pagi → سلامت ڤڬي</span></div>
+                    <div class="cheatsheet-cell-example"><span class="example-text">bagaimana → بڬيمان</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Pegon Full-Screen Modal -->
+    <div id="about-pegon-modal" class="full-screen-modal">
+        <div class="modal-header">
+            <h2>Apa itu Arab Pegon?</h2>
+            <button id="close-about-modal" class="close-btn" aria-label="Tutup">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="cheatsheet-grid info-section-content">
+                    <h3 class="section-title">Pengertian Arab Pegon</h3>
+                    <p>Arab Pegon adalah sistem penulisan yang digunakan untuk menulis bahasa-bahasa Nusantara seperti Jawa, Sunda, Madura, dan Melayu dengan menggunakan huruf Arab. Kata "Pegon" berasal dari bahasa Jawa "peng-Arab", yang berarti Arab yang diubah atau disesuaikan.</p>
+                    
+                    <h3 class="section-title">Asal-usul Pegon</h3>
+                    <p>Sejarah penulisan Arab Pegon di Nusantara diperkirakan ada sejak tahun 1300 M/1400 M seiring dengan masuknya agama Islam menggantikan kepercayaan Animisme, Hindu, Budha. Mengenai siapa yang menemukan huruf Arab Pegon ada beberapa pendapat. Berdasarkan catatan arab pegon digagas oleh Wali Songo seperti Sunan Ampel atau Sunan Gunung Jati, seiring penyebaran Islam menggantikan Hindu-Buddha.  Ada juga yang mengatakan bahwa huruf Arab Pegon ini ditemukan oleh Imam Nawawi Al-Bantani. Ada juga yang berpendapat sudah ada sebelum tokoh-tokoh tersebut. Huruf Arab yang sudah dikenal untuk pengajaran Al-Qur'an.</p>
+                    
+                    <h3 class="section-title">Perkembangan Pegon</h3>
+                    <p>Pada masa kolonial Belanda, Arab Pegon berfungsi sebagai kode rahasia perlawanan, seperti dalam Babad Diponegoro atau pesan ulama di Banten dan Pacitan. Ulama mengharamkan huruf Latin sebagai strategi perang, menjadikannya pemersatu umat melawan penjajah. Seiring waktu, Pegon tidak hanya digunakan untuk teks keagamaan tetapi juga untuk sastra, dokumen administrasi, dan komunikasi sehari-hari. Sistem ini mengalami evolusi dan beradaptasi dengan kebutuhan masyarakat lokal.</p>
+                    
+                    <h3 class="section-title">Karakteristik Pegon</h3>
+                    <ul>
+                        <li>Huruf Arab disesuaikan dengan bunyi bahasa Nusantara</li>
+                        <li>Beberapa huruf Arab ditambahi dengan tanda khusus untuk bunyi lokal</li>
+                        <li>Diadaptasi dari berbagai macam huruf Arab, termasuk huruf-huruf yang digunakan di Timur Tengah</li>
+                    </ul>
+                    
+                    <h3 class="section-title">Pentingnya Mempelajari Pegon</h3>
+                    <p>Pemahaman tentang Pegon penting karena:</p>
+                    <ul>
+                        <li>Menjaga warisan budaya dan literasi tradisional</li>
+                        <li>Mengakses karya sastra dan dokumen sejarah klasik</li>
+                        <li>Memahami hubungan antara agama, budaya, dan bahasa di Nusantara</li>
+                        <li>Menyambungkan generasi modern dengan akar budaya lokal</li>
+                    </ul>
+                    
+                </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
