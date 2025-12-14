@@ -5,39 +5,38 @@ class PegonTranslator {
     // Latin to Pegon conversion mapping based on correct Pegon script rules
     this.latinToPegonMap = {
       // Basic consonants
-      'b': 'ب', 't': 'ت', 'ṡ': 'ث', 'j': 'ج', 'c': 'چ', 'ḥ': 'ح', 
-      'kh': 'خ', 'sh': 'ش', 'sy': 'ش', 'ṡy': 'ش', 'ṣ': 'ص', 'ḍ': 'ض', 'ṭ': 'ط', 'ẓ': 'ظ', 
+      'b': 'ب', 't': 'ت', 'ṡ': 'ث', 'j': 'ج', 'c': 'چ', 'ḥ': 'ح',
+      'kh': 'خ', 'sh': 'ش', 'sy': 'ش', 'ṡy': 'ش', 'ṣ': 'ص', 'ḍ': 'ض', 'ṭ': 'ط', 'ẓ': 'ظ',
       'dz': 'ذ',  // For 'dz' sound in Javanese/Malay
-      '‘': 'ع', '’': 'ع',  // Both apostrophes map to ain
-      'ġ': 'غ', 'f': 'ف', 'q': 'ق', 'k': 'ك', 'g': 'ݢ', 'l': 'ل', 
-      'm': 'م', 'n': 'ن', 'ny': 'ۑ', 'ng': 'ڠ', 'h': 'ه', 'w': 'و', 'y': 'ي', 
+      'ġ': 'غ', 'f': 'ف', 'q': 'ق', 'k': 'ك', 'g': 'ݢ', 'l': 'ل',
+      'm': 'م', 'n': 'ن', 'ny': 'ۑ', 'ng': 'ڠ', 'h': 'ه', 'w': 'و', 'y': 'ي',
       'z': 'ز', 'r': 'ر', 's': 'س', 'd': 'د', 'v': 'ڤ', 'p': 'ڤ',
-      
+
       // Vowel combinations in Pegon
       'ai': 'اي', 'au': 'اُو', 'ei': 'اِي', 'eu': 'اُي', 'oi': 'وِي',
-      
+
       // Punctuation marks in Arabic/Pegon
       '.': '۔',  // Arabic full stop
       ',': '،',   // Arabic comma
       '?': '؟',   // Arabic question mark
       ';': '؛',   // Arabic semicolon
       '!': '!',   // Exclamation mark (kept as is)
-      
+
       // Numbers in Eastern Arabic numerals
-      '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤', 
+      '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
       '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
     };
 
     // Consonant cluster handling rules - these should be applied after converting Latin to Arabic characters
     // We'll handle these in the conversion process instead of using regex on Latin characters
     this.clusterRules = [];
-    
+
 
 
     // Syllable pattern rules for proper Pegon conversion
     this.syllablePatterns = [
       // Pattern for consonant+vowel combinations
-      { pattern: /([ب-ي])([aiueo])/g, replacement: '$1$2' }, 
+      { pattern: /([ب-ي])([aiueo])/g, replacement: '$1$2' },
       // Pattern for final vowels
       { pattern: /([ب-ي])([aiueo])$/g, replacement: '$1$2' },
     ];
@@ -49,7 +48,7 @@ class PegonTranslator {
       { latin: 'terima kasih', pegon: 'تريما كاسيه' },
       { latin: 'selamat pagi', pegon: 'سلامت ڤڬي' },
       { latin: 'bagaimana kabarmu?', pegon: 'بڬيمان كابرمو؟' },
-      { latin: 'assalamu\'alaikum', pegon: 'سلااموعلايكום' },
+      { latin: 'assalamu\'alaikum', pegon: 'سلاامُعלאيكום' },  // apostrophe between 'u' and 'a' becomes 'ع'
       { latin: 'mohon maaf', pegon: 'موهن ماف' },
       { latin: 'silakan duduk', pegon: 'سلاكن دودوق' }
     ];
@@ -239,6 +238,24 @@ class PegonTranslator {
     // First normalize the text: handle special combinations
     let result = text.toLowerCase();
 
+    // Check for text boundary apostrophes at the very beginning and end of the entire text
+    let textPrefixPunct = '';
+    let textSuffixPunct = '';
+    
+    // Extract leading apostrophes from entire text
+    while (/^[\'\u2018\u2019]/.test(result)) {
+      const char = result[0];
+      textPrefixPunct += char;
+      result = result.substring(1);
+    }
+    
+    // Extract trailing apostrophes from entire text
+    while (/[\'\u2018\u2019]$/.test(result)) {
+      const char = result[result.length - 1];
+      textSuffixPunct = char + textSuffixPunct;
+      result = result.substring(0, result.length - 1);
+    }
+
     // Process each line separately to maintain line breaks
     let lines = result.split('\n');
     let convertedLines = [];
@@ -264,6 +281,9 @@ class PegonTranslator {
     }
 
     result = convertedLines.join('\n');
+    
+    // Add back the text boundary apostrophes
+    result = textPrefixPunct + result + textSuffixPunct;
 
     return result;
   }
@@ -272,21 +292,67 @@ class PegonTranslator {
   convertWordToPegon(word) {
     // Check if the word starts with a vowel and handle initial vowel properly
     let startsWithVowel = /^[aeiou]/.test(word.toLowerCase());
-    
+
     // Load Arabic terms from the JSON file or use the default list
     const arabicTerms = this.getArabicTerms();
-    
-    const lowerWord = word.toLowerCase();
-    if (arabicTerms[lowerWord]) {
-      return arabicTerms[lowerWord];
+
+    // Extract punctuation from the beginning and end of the word
+    let prefixPunct = '';
+    let suffixPunct = '';
+    let cleanWord = word;
+
+    // Extract leading punctuation (including apostrophes at word boundaries)
+    while (/^[^\w\s]/.test(cleanWord)) {
+      const char = cleanWord[0];
+      // Extract apostrophes and other punctuation as prefix if they're at boundaries
+      if (this.isBoundaryApostrophe(cleanWord, true)) {
+        prefixPunct += char;
+        cleanWord = cleanWord.substring(1);
+      } else if (!['\'', '‘', '’'].includes(char)) {
+        // Extract non-apostrophe punctuation as prefix
+        prefixPunct += char;
+        cleanWord = cleanWord.substring(1);
+      } else {
+        // For apostrophes that are not at boundaries, break
+        break;
+      }
+    }
+
+    // Extract trailing punctuation (including apostrophes at word boundaries)
+    while (/[^\w\s]$/.test(cleanWord)) {
+      const char = cleanWord[cleanWord.length - 1];
+      // Extract apostrophes and other punctuation as suffix if they're at boundaries
+      if (this.isBoundaryApostrophe(cleanWord, false)) {
+        suffixPunct = char + suffixPunct;
+        cleanWord = cleanWord.substring(0, cleanWord.length - 1);
+      } else if (!['\'', '‘', '’'].includes(char)) {
+        // Extract non-apostrophe punctuation as suffix
+        suffixPunct = char + suffixPunct;
+        cleanWord = cleanWord.substring(0, cleanWord.length - 1);
+      } else {
+        // For apostrophes that are not at boundaries, break
+        break;
+      }
     }
     
+    // Handle apostrophes within the remaining word context: if an apostrophe is between letters, treat as consonant 'ع'
+    cleanWord = this.handleApostrophesInContext(cleanWord);
+
+    // Check if the clean word (without punctuation) exists in Arabic terms
+    const lowerCleanWord = cleanWord.toLowerCase();
+    if (arabicTerms[lowerCleanWord]) {
+      // Convert the punctuation marks to Arabic equivalents
+      let convertedPrefix = this.convertPunctuation(prefixPunct);
+      let convertedSuffix = this.convertPunctuation(suffixPunct);
+      return convertedPrefix + arabicTerms[lowerCleanWord] + convertedSuffix;
+    }
+
     // First pass: replace all digraphs and trigraphs
-    let result = word.toLowerCase();
-    
+    let result = cleanWord.toLowerCase();
+
     // Replace trigraphs first (like 'ngg')
     result = result.replace(/ngg/g, 'ڠݢ');
-    
+
     // Replace digraphs (like 'ng', 'ny', 'sy', 'kh', etc.)
     // We need to be careful about the order - longer matches first
     result = result.replace(/ng/g, 'ڠ');
@@ -295,23 +361,23 @@ class PegonTranslator {
     result = result.replace(/sh/g, 'ش');
     result = result.replace(/kh/g, 'خ');
     result = result.replace(/dz/g, 'ذ');
-    
+
     // Now process single characters character by character
     let finalResult = '';
     let i = 0;
     const vowels = 'aeiou';
-    
+
     while (i < result.length) {
       const char = result[i];
-      
+
       // If this character is already a Pegon character (from digraph/trigraph replacement), use it directly
       if (['ڠ', 'ڽ', 'ش', 'خ', 'ذ'].includes(char)) {
         finalResult += char;
-      } 
+      }
       // Check for single character mappings
       else if (this.latinToPegonMap[char]) {
         finalResult += this.latinToPegonMap[char];
-      } 
+      }
       // Handle vowels - convert all Latin vowels to Arabic equivalents
       else if (vowels.includes(char)) {
         // If this is the first character of the word and starts with a vowel, use special initial form
@@ -321,21 +387,25 @@ class PegonTranslator {
           // Always convert Latin vowels to Arabic/Pegon equivalents
           finalResult += this.convertVowelToPegon(char);
         }
-      } 
+      }
       // Non-alphabetic characters
       else {
         finalResult += char; // Punctuation, spaces, etc.
       }
-      
+
       i++;
     }
-    
+
     // Apply vowel dropping rules for more authentic Pegon
     finalResult = this.applyPegonVowelDropping(finalResult);
-    
-    return finalResult;
+
+    // Convert the punctuation marks to Arabic equivalents and add back
+    let convertedPrefix = this.convertPunctuation(prefixPunct);
+    let convertedSuffix = this.convertPunctuation(suffixPunct);
+
+    return convertedPrefix + finalResult + convertedSuffix;
   }
-  
+
   // Helper function to identify if a character is a consonant
   isConsonant(char) {
     const vowels = 'aeiouAEIOU';
@@ -350,7 +420,7 @@ class PegonTranslator {
     word = word.replace(/ny/g, 'ny'); // Keep 'ny' as a consonant cluster
     word = word.replace(/sy/g, 'sy'); // Keep 'sy' as a consonant cluster
     word = word.replace(/kh/g, 'kh'); // Keep 'kh' as a consonant cluster
-    
+
     // Return the word with identified consonant clusters
     return word;
   }
@@ -365,7 +435,7 @@ class PegonTranslator {
       'e': ' ',  // typically 'a' sound in Pegon context
       'o': 'و'   // waw for 'o' sound
     };
-    
+
     return vowelMap[vowel] || 'ا'; // Default to alif if not found
   }
 
@@ -373,7 +443,7 @@ class PegonTranslator {
   handleInitialVowel(vowel) {
     // In Pegon script (Arabic-based), according to user requirement:
     // For 'a' sound, we use أ (alif with hamza above) as specified by user
-    // For 'i' sound, we use إ (alif with hamza above) 
+    // For 'i' sound, we use إ (alif with hamza above)
     // For 'u' and 'o' sounds, we use أ (alif with hamza above)
     const initialVowelMap = {
       'a': 'أ',     // alif with hamza above for initial 'a' as per user requirement
@@ -396,9 +466,9 @@ class PegonTranslator {
   applyPegonVowelDropping(text) {
     // In Pegon script (Arabic-based), many short vowels are dropped for readability
     // This function removes unnecessary vowel diacritics while preserving meaning
-    
 
-    
+
+
     let result = '';
     let words = text.split(' ');
 
@@ -413,16 +483,16 @@ class PegonTranslator {
 
       while (i < word.length) {
         const currentChar = word[i];
-        
+
         // Check if this is an Arabic/Pegon character that represents a vowel
         // These include: ا (alif), ي (ya with fatha), و (waw with damma), etc.
         // But also include Arabic diacritics (harakat)
         const isArabicVowelMark = /[\u064B-\u065F\u0670]/.test(currentChar); // fatha, kasra, damma, etc.
-        
+
         // For Pegon, we keep the main consonants and basic vowel letters but may drop diacritics
         // However, since our previous conversion may have mixed Latin and Arabic characters,
         // we first need to check if this is a Latin vowel that shouldn't be here
-        
+
         // If character is a Latin vowel (which should not happen if conversion was proper),
         // this means there's an issue in the conversion process
         if (/[aeiouAEIOU]/.test(currentChar)) {
@@ -437,7 +507,7 @@ class PegonTranslator {
         } else {
           processedWord += currentChar;
         }
-        
+
         i++;
       }
 
@@ -459,18 +529,82 @@ class PegonTranslator {
   applyPegonPatternCorrections(output) {
     // After vowel dropping and conversion, apply specific corrections
     // This handles cases where the simple vowel dropping algorithm doesn't produce the correct Pegon form
-    
+
     // Common corrections based on expected patterns
     // For patterns that emerge after vowel dropping and conversion
     // If we have the Arabic form that should be corrected
-    
+
     return output;
+  }
+
+  // Helper function to check if an apostrophe is at a boundary (not between characters)
+  isBoundaryApostrophe(word, isPrefixCheck = true) {
+    if (!word) return false;
+    
+    const char = isPrefixCheck ? word[0] : word[word.length - 1];
+    
+    // Check if it's an apostrophe
+    if (!['\'', '‘', '’'].includes(char)) {
+      return false;
+    }
+    
+    // For prefix check (first character)
+    if (isPrefixCheck) {
+      // If this is the first character and next character is alphanumeric, it's boundary apostrophe
+      const nextChar = word.length > 1 ? word[1] : '';
+      return /\w/.test(nextChar);
+    } 
+    // For suffix check (last character)
+    else {
+      // If this is the last character and previous character is alphanumeric, it's boundary apostrophe
+      const prevChar = word.length > 1 ? word[word.length - 2] : '';
+      return /\w/.test(prevChar);
+    }
   }
 
   // Handle proper vowel patterns in Pegon
   handleVowelPatterns(text) {
     // This function is maintained for compatibility
     return text;
+  }
+
+  // Handle apostrophes based on their position (between letters vs at boundaries)
+  handleApostrophesInContext(word) {
+    // Replace apostrophes that are between letters (consonant 'ع') vs at boundaries (punctuation)
+    let result = '';
+    for (let i = 0; i < word.length; i++) {
+      const char = word[i];
+      // Check if this is an apostrophe
+      if (['\'', '‘', '’'].includes(char)) {
+        // Check if it's between two word characters (letters/numbers)
+        const prevChar = i > 0 ? word[i - 1] : '';
+        const nextChar = i < word.length - 1 ? word[i + 1] : '';
+        
+        // If apostrophe is between alphanumeric characters, treat as consonant 'ع'
+        if (/\w/.test(prevChar) && /\w/.test(nextChar)) {
+          result += 'ع';  // Arabic ain consonant
+        } else {
+          // If apostrophe is at boundary, keep as is for punctuation processing later
+          result += char;
+        }
+      } else {
+        result += char;
+      }
+    }
+    return result;
+  }
+
+  // Helper function to convert Latin punctuation to Arabic equivalents
+  convertPunctuation(punctStr) {
+    let result = '';
+    for (let char of punctStr) {
+      if (this.latinToPegonMap[char]) {
+        result += this.latinToPegonMap[char];
+      } else {
+        result += char; // Keep any unrecognized punctuation as is
+      }
+    }
+    return result;
   }
 
   clearInput() {
@@ -539,7 +673,7 @@ class PegonTranslator {
       });
     }
   }
-  
+
   // Get Arabic terms from JSON file or default list
   getArabicTerms() {
     // Default Arabic terms - provided as fallback
@@ -560,7 +694,7 @@ class PegonTranslator {
       'amin': 'آمين',
       'aamiin': 'آمين',
       'assalamualaikum': 'السلام عليكم',
-      'waalaikumsalam': 'و عليكم السلام'
+      'waalaikumsalam': 'و عليكم السلام',
     };
 
     // Check if we're in Node.js environment
@@ -570,7 +704,7 @@ class PegonTranslator {
         const fs = require('fs');
         const path = require('path');
         const jsonPath = path.join(__dirname, 'Assets', 'kamus', 'serapan-kata-arab.json');
-        
+
         if (fs.existsSync(jsonPath)) {
           const fileContent = fs.readFileSync(jsonPath, 'utf8');
           const loadedTerms = JSON.parse(fileContent);
@@ -597,6 +731,7 @@ Pegon Translator CLI - Command Line Interface
 
 Usage:
   pegon-generated [options] [text]
+  pegon-generated [options] \`text\`  # Use backticks to wrap text with special characters
 
 Options:
   -v,--v, --version      Show version information
@@ -604,9 +739,11 @@ Options:
   --man              Show manual page
 
 Examples:
-  pegon-generated "apa kabar"     # Convert "apa kabar" to Pegon
-  pegon-generated "saya sedang belajar"  # Convert longer text
-  pegon-generated --help          # Show this help
+  pegon-generated "apa kabar"                 # Convert "apa kabar" to Pegon
+  pegon-generated "saya sedang belajar"       # Convert longer text
+  pegon-generated 'apa kabar'                 # Convert with single quotes
+  pegon-generated \`apa kabar\`                 # Convert with backticks
+  pegon-generated --help                      # Show this help
 
 Description:
   Translates Latin text to Pegon script (Arabic-based writing system).
@@ -629,6 +766,7 @@ NAME
 
 SYNOPSIS
   pegon-generated [OPTIONS] [TEXT]
+  pegon-generated [OPTIONS] \`TEXT\`  # Use backticks to wrap text
 
 DESCRIPTION
   The pegon-generated command translates Latin text to Pegon script.
@@ -650,6 +788,9 @@ USAGE EXAMPLE
 
   $ pegon-generated "saya sedang belajar"
   ساي سدڠ بلجر
+
+  $ pegon-generated \`apa kabar\`
+  اڤا كابار
 
 AUTHOR
   Written by Andi Almafhum for cultural preservation
@@ -687,7 +828,13 @@ function main() {
   }
 
   // Join all remaining arguments as input text
-  const inputText = args.join(' ');
+  let inputText = args.join(' ');
+
+  // Check if input text is wrapped in backticks and extract content if so
+  const backtickMatch = inputText.match(/`(.*)`/s);
+  if (backtickMatch) {
+    inputText = backtickMatch[1];
+  }
 
   // Create translator instance and translate the text (with isCLI=true to avoid web UI initialization)
   const translator = new PegonTranslator(true);
@@ -704,7 +851,7 @@ function main() {
 // Export the class for use in Node.js environment
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { PegonTranslator };
-  
+
   // Check if script is run directly (not required as a module)
   if (require.main === module) {
     main();
@@ -725,63 +872,63 @@ if (typeof module !== 'undefined' && module.exports) {
     if (outputControls) {
       outputControls.appendChild(downloadBtn);
     }
-    
+
     // Cheatsheet modal functionality
     const cheatsheetBtn = document.getElementById('cheatsheet-btn');
-    const modal = document.getElementById('cheatsheet-modal');
+    const cheatsheetModal = document.getElementById('cheatsheet-modal');
     const closeModalBtn = document.getElementById('close-modal');
-    
+
     // Open modal when button is clicked
     if (cheatsheetBtn) {
       cheatsheetBtn.addEventListener('click', () => {
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        cheatsheetModal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent body scroll when modal is open
       });
-    }
-    
-    // Close modal when close button is clicked
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener('click', () => {
-        modal.classList.remove('active');
-        document.body.style.overflow = 'auto'; // Restore scrolling
-      });
-    }
-    
-    // Close modal with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.classList.contains('active')) {
-        modal.classList.remove('active');
-        document.body.style.overflow = 'auto'; // Restore scrolling
+
+      // Close modal when close button is clicked
+      if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+          cheatsheetModal.classList.remove('active');
+          document.body.style.overflow = ''; // Restore body scroll
+        });
       }
-    });
+
+      // Close modal when clicking outside of it
+      window.addEventListener('click', (event) => {
+        if (event.target === cheatsheetModal) {
+          cheatsheetModal.classList.remove('active');
+          document.body.style.overflow = ''; // Restore body scroll
+        }
+      });
+    }
     
     // About Pegon modal functionality
     const aboutPegonBtn = document.getElementById('about-pegon-btn');
-    const aboutModal = document.getElementById('about-pegon-modal');
+    const aboutPegonModal = document.getElementById('about-pegon-modal');
     const closeAboutModalBtn = document.getElementById('close-about-modal');
 
-    // Open About Pegon modal when button is clicked
+    // Open modal when button is clicked
     if (aboutPegonBtn) {
       aboutPegonBtn.addEventListener('click', () => {
-        aboutModal.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        aboutPegonModal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent body scroll when modal is open
       });
-    }
 
-    // Close About Pegon modal when close button is clicked
-    if (closeAboutModalBtn) {
-      closeAboutModalBtn.addEventListener('click', () => {
-        aboutModal.classList.remove('active');
-        document.body.style.overflow = 'auto'; // Restore scrolling
-      });
-    }
-
-    // Close About Pegon modal with Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && aboutModal.classList.contains('active')) {
-        aboutModal.classList.remove('active');
-        document.body.style.overflow = 'auto'; // Restore scrolling
+      // Close modal when close button is clicked
+      if (closeAboutModalBtn) {
+        closeAboutModalBtn.addEventListener('click', () => {
+          aboutPegonModal.classList.remove('active');
+          document.body.style.overflow = ''; // Restore body scroll
+        });
       }
-    });
+
+      // Close modal when clicking outside of it
+      window.addEventListener('click', (event) => {
+        if (event.target === aboutPegonModal) {
+          aboutPegonModal.classList.remove('active');
+          document.body.style.overflow = ''; // Restore body scroll
+        }
+      });
+    }
   });
 }
