@@ -33,7 +33,7 @@ Description:
 
 // Function to display version information
 function showVersion() {
-  console.log('Pegon Generated - Version 1.0.0 (Long Term Support)');
+  console.log('Pegon Generated - Version 1.0.1 (Long Term Support)');
 }
 
 // Function to display manual page
